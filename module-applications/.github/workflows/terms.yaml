@@ -24,9 +24,13 @@ jobs:
           BODY: ${{ github.event.pull_request.body }}
           ASSOCIATION: ${{ github.event.pull_request.author_association }}
           AUTHOR: ${{ github.event.pull_request.user.login }}
+          IMAGE_UPDATE_BOT: ${{ vars.IMAGE_UPDATE_BOT }}
           REPO: ${{ github.repository }}
         run: |
-          # The repository's own members and its bots do not apply through this form.
+          # The repository's own members and its bots (the image update's App too) do not apply through this form.
+          if [ -n "$IMAGE_UPDATE_BOT" ] && [ "$AUTHOR" = "$IMAGE_UPDATE_BOT" ]; then
+            echo "Opened by the image update ($AUTHOR): no terms box needed."; exit 0
+          fi
           case "$ASSOCIATION:$AUTHOR" in
             OWNER:*|MEMBER:*|*:dependabot\[bot\]|*:github-actions\[bot\])
               echo "Opened by $AUTHOR ($ASSOCIATION): no terms box needed."; exit 0 ;;

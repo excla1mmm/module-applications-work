@@ -116,15 +116,34 @@ jobs:
     if: always() && needs.look.outputs.behind == 'true' && (needs.controls.result == 'success' || needs.controls.result == 'failure')
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    # The App's private key lives only in this environment (docs/branch-protection.md, "The image update pull request").
+    environment: image-update
     permissions:
       contents: write
       pull-requests: write
     steps:
+      # Option B: with the image update's GitHub App configured (variable IMAGE_UPDATE_APP_ID, secret
+      # IMAGE_UPDATE_APP_PRIVATE_KEY in the environment image-update, variable IMAGE_UPDATE_BOT = its bot login), the
+      # branch is pushed and the pull request opened with the App's token, so the required checks run on it as on any
+      # pull request. Without it GITHUB_TOKEN is used and the pull request starts no checks (merge by hand, audited).
+      - name: Token of the image update's GitHub App
+        id: app
+        if: vars.IMAGE_UPDATE_APP_ID != ''
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0 (sha-pinned)
+        with:
+          app-id: ${{ vars.IMAGE_UPDATE_APP_ID }}
+          private-key: ${{ secrets.IMAGE_UPDATE_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1 (sha-pinned)
+        with:
+          token: ${{ steps.app.outputs.token || github.token }}
 
       - name: Open or update the pull request
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.app.outputs.token || github.token }}
+          WITH_APP: ${{ steps.app.outputs.token != '' }}
           REPO: ${{ github.repository }}
           CONFIG: ${{ needs.look.outputs.config }}
           VERSION: ${{ needs.look.outputs.version }}
@@ -165,9 +184,14 @@ jobs:
 
           Merging this changes the test environment: test results and approvals of open applications obtained on the old digest become stale and must be run again.
 
-          This pull request only changes \`config/mikopbx.yaml\`. It was opened by .github/workflows/image-update.yaml; pull requests opened by GITHUB_TOKEN do not start other workflows, so the control modules ran in that run, before it was opened.
+          This pull request only changes \`config/mikopbx.yaml\`. It was opened by .github/workflows/image-update.yaml, and the control modules ran in that run, before it was opened.
           EOF
           )
+          if [ "$WITH_APP" = true ]; then
+            body="$body"$'\n\n'"Opened by the image update's GitHub App: the required checks run on it like on any pull request (maintenance: no application)."
+          else
+            body="$body"$'\n\n'"Opened with GITHUB_TOKEN, so no other workflow runs on it and the ruleset blocks it: an admin merges it by setting the ruleset to Disabled for the merge (audited), or configure the App (docs/branch-protection.md)."
+          fi
           existing=$(gh pr list --repo "$REPO" --head "$branch" --state open --json number --jq '.[0].number // empty')
           if [ -n "$existing" ]; then
             gh pr edit "$existing" --repo "$REPO" --title "$title" --body "$body"

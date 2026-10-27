@@ -2,17 +2,17 @@
 
 The checks only colour a pull request; without branch protection anyone with write access can merge a red one
 (seen in the sandbox on 2026-10-27: an edit to `test.yaml` and a module that failed its tests were merged). The
-rules below make the checks a gate. Set them as a ruleset (Settings → Rules → Rulesets → New branch ruleset) on the
-default branch.
+rules below make the checks a gate. Set them as a ruleset on the default branch: import
+[ruleset-main.json](ruleset-main.json) (Settings → Rules → Rulesets → New ruleset → Import a ruleset; docs/setup.md).
 
 | Setting | Value | Why |
 |---|---|---|
 | Enforcement | Active | |
 | Bypass list | **empty** | owners and admins go through the same gate (LIC-614: "the bypass rights are accounted for"); a bypass let a pull request into `main` without its checks in the sandbox, see below |
 | Restrict deletions, Block force pushes | on | the registry's history is the record |
-| Require a pull request before merging | on, 1 approval | MIKO's decision is a person's |
+| Require a pull request before merging | on, 1 approval (or more) | MIKO's decision is a person's; the author cannot approve their own pull request |
 | Dismiss stale pull request approvals when new commits are pushed | on | an approval covers one commit and one revision of the application |
-| Require review from Code Owners | on once CODEOWNERS names MIKO's reviewers | |
+| Require review from Code Owners | on | CODEOWNERS names MIKO's reviewers; at least two, or nothing can be merged |
 | Require approval of the most recent reviewable push | on | the last push is approved by someone other than its author |
 | Require status checks to pass | on, "Require branches to be up to date before merging" on | results must be for the commit being merged, on the current base |
 | Required checks | `result` (Test), `gather` (Validate), `terms-accepted` (Terms), `agreement` (Publisher agreement), `AI review` (commit status) | see below |
@@ -31,22 +31,22 @@ What each required check means:
 
 ## The image update pull request
 
-`image-update.yaml` opens its pull request with GITHUB_TOKEN, and GitHub starts no workflow for such a pull request,
-so the required checks never appear on it and the ruleset blocks it. The control modules have already run in the
-image update's own run (linked from the pull request). Ways out, MIKO's choice:
+A pull request opened with `GITHUB_TOKEN` starts no workflow, so the required checks would never appear on the image
+update's pull request and the ruleset would block it. The control modules have already run in the image update's own
+run (linked from the pull request). Ways out, MIKO's choice:
 
-- **B. A GitHub App for the image update** (recommended; the owner's choice for the real repository, 2026-10-27): the workflow opens the pull request with the App's token
-  (stored as a secret in its own environment, `image-update`), so the normal checks run on it and no bypass is
-  needed. One more credential to own.
-- **Manual**: an admin sets the ruleset to *Disabled*, merges the image update pull request and sets it back to
-  *Active*. GitHub records both changes in the audit log. Use rarely; nothing stops another merge in that window.
+- **B. A GitHub App for the image update** (recommended; the owner's choice for the real repository, 2026-10-27). Set
+  up as in [setup.md](setup.md#4-the-image-update-app-option-b); `image-update.yaml` uses it as soon as
+  `IMAGE_UPDATE_APP_ID` is set. The branch is pushed and the pull request opened with the App's token (its key only in
+  the environment `image-update`), so the normal checks run on it; a pull request by that bot (`IMAGE_UPDATE_BOT`)
+  that changes `config/mikopbx.yaml` and nothing else is maintenance, and still needs a reviewer's approval. No bypass.
+- **Manual** (the fallback without the App): an admin sets the ruleset to *Disabled*, merges the image update pull
+  request and sets it back to *Active*. GitHub records both changes in the audit log. Use rarely; nothing stops another
+  merge in that window. Needs "Allow GitHub Actions to create and approve pull requests" for the workflow to open it.
 - **A. Admin bypass for pull requests only** — **not recommended.** With *Repository admin* in the bypass list
   (mode *For pull requests only*) direct pushes stay blocked, but an admin can merge **any** pull request without
   its checks, and so can an agent acting through a GitHub App on that admin's behalf. The convention "only image
   update pull requests" is not enforced and was broken in the sandbox (below).
-
-Also: Settings → Actions → General → "Allow GitHub Actions to create and approve pull requests" on (needed for the
-workflow to open its pull request at all).
 
 ## The publisher agreement on maintenance pull requests
 
@@ -56,9 +56,11 @@ applications. Such pull requests are often made by an AI assistant whose commits
 `claude`, which cannot sign. Any pull request that touches `applications/`, or comes from anyone else, still needs every
 author's signature. The exemption only reads the list of changed files through the API.
 
-## In the sandbox (2026-10-27)
+## In the pilot sandbox (2026-10-27)
 
-Ruleset `main: applications gate` (id 25947319) on excla1mmm/module-applications follows the table with an **empty
+The pilot ran in a temporary sandbox repository (since removed); what was found and checked there:
+
+Ruleset `main: applications gate` (id 25947319) in the sandbox followed the table with an **empty
 bypass list**, and differences for a one-person sandbox: **0 required approvals** (since 2026-10-27, M04: GitHub does
 not let the only account approve its own pull request, so with 1 nothing could be merged; the real repository keeps 1 or
 more), "Require approval of the most recent reviewable push" is **off** and code owner review is off (no CODEOWNERS

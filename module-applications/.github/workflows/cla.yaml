@@ -37,9 +37,20 @@ jobs:
           REPO: ${{ github.repository }}
           NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
           ASSOCIATION: ${{ github.event.pull_request.author_association || github.event.issue.author_association }}
+          AUTHOR: ${{ github.event.pull_request.user.login || github.event.issue.user.login }}
+          IMAGE_UPDATE_BOT: ${{ vars.IMAGE_UPDATE_BOT }}
         run: |
           maintenance=false
+          # The image update's GitHub App: maintenance only when it changes config/mikopbx.yaml and nothing else.
+          if [ -n "$IMAGE_UPDATE_BOT" ] && [ "$AUTHOR" = "$IMAGE_UPDATE_BOT" ]; then
+            ASSOCIATION=IMAGE_UPDATE
+          fi
           case "$ASSOCIATION" in
+            IMAGE_UPDATE)
+              if paths=$(gh api --paginate "repos/$REPO/pulls/$NUMBER/files?per_page=100" --jq '.[] | .filename, (.previous_filename // empty)') \
+                  && [ "$paths" = config/mikopbx.yaml ]; then
+                maintenance=true
+              fi ;;
             OWNER|MEMBER)
               if paths=$(gh api --paginate "repos/$REPO/pulls/$NUMBER/files?per_page=100" --jq '.[] | .filename, (.previous_filename // empty)'); then
                 # The API lists at most 3000 files: a longer list may hide an application, so it is not maintenance.
@@ -51,7 +62,7 @@ jobs:
               fi ;;
           esac
           if [ "$maintenance" = true ]; then
-            echo "A maintenance pull request ($ASSOCIATION) that changes no application: no publisher agreement needed."
+            echo "A maintenance pull request ($ASSOCIATION, $AUTHOR) that changes no application: no publisher agreement needed."
           fi
           echo "maintenance=$maintenance" >> "$GITHUB_OUTPUT"
 

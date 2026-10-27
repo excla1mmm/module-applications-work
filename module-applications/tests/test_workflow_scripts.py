@@ -59,11 +59,11 @@ def repository(tmp_path):
     return base, pull_request
 
 
-def run_take(base, tmp_path, head, paths, association="NONE"):
+def run_take(base, tmp_path, head, paths, association="NONE", author="someone", bot=""):
     """Run take_application.sh in `base` with a fake gh that serves this pull request."""
     bin_dir = tmp_path / "bin"
     bin_dir.mkdir(exist_ok=True)
-    (tmp_path / "pull.json").write_text(json.dumps({"head": {"sha": head}, "changed_files": len(paths), "author_association": association}))
+    (tmp_path / "pull.json").write_text(json.dumps({"head": {"sha": head}, "changed_files": len(paths), "author_association": association, "user": {"login": author}}))
     (tmp_path / "files.txt").write_text("".join(f"{p}\n" for p in paths))
     gh = bin_dir / "gh"
     gh.write_text(f"""#!/bin/sh
@@ -77,7 +77,7 @@ esac
     output.write_text("")
     runner_temp = tmp_path / "runner"
     runner_temp.mkdir(exist_ok=True)
-    env = {**os.environ, "PATH": f"{bin_dir}:{os.environ['PATH']}", "GITHUB_OUTPUT": str(output), "RUNNER_TEMP": str(runner_temp)}
+    env = {**os.environ, "PATH": f"{bin_dir}:{os.environ['PATH']}", "GITHUB_OUTPUT": str(output), "RUNNER_TEMP": str(runner_temp), "IMAGE_UPDATE_BOT": bot}
     done = subprocess.run([str(base / ".github" / "scripts" / "take_application.sh"), "owner/repo", "1"], cwd=base, capture_output=True, text=True, env=env)
     values = dict(line.split("=", 1) for line in output.read_text().splitlines() if "=" in line)
     return done, values
@@ -155,6 +155,25 @@ def test_take_application_refuses_the_same_change_from_anyone_else(repository, t
     assert done.returncode == 1 and "[APP-006]" in done.stderr and "maintenance" not in values
 
 
+def test_take_application_lets_the_image_update_app_change_only_the_image_pin(repository, tmp_path):
+    base, pull_request = repository
+    bot = "mikopbx-image-update[bot]"
+    head, paths = pull_request({"config/mikopbx.yaml": "# new image\n"})
+    done, values = run_take(base, tmp_path, head, paths, author=bot, bot=bot)
+    assert done.returncode == 0 and values.get("maintenance") == "true"
+    # Without the variable, or with any other file, the App is treated like anyone else.
+    done, values = run_take(base, tmp_path, head, paths, author=bot, bot="")
+    assert done.returncode == 1 and "maintenance" not in values
+
+
+def test_take_application_refuses_more_than_the_image_pin_from_the_image_update_app(repository, tmp_path):
+    base, pull_request = repository
+    bot = "mikopbx-image-update[bot]"
+    head, paths = pull_request({"config/mikopbx.yaml": "# new image\n", "tools/check": "# changed\n"})
+    done, values = run_take(base, tmp_path, head, paths, author=bot, bot=bot)
+    assert done.returncode == 1 and "maintenance" not in values
+
+
 def test_an_owner_cannot_mix_an_application_with_other_changes(repository, tmp_path):
     base, pull_request = repository
     head, paths = pull_request({"applications/ModuleAppCheck/application.yaml": GOOD, ".github/workflows/test.yaml": "on: push\n"})
@@ -206,7 +225,7 @@ ANSWERS = {
     ("OWNER", ["docs/x.md"], True, "false"),
     ("OWNER", [f"docs/{i}.md" for i in range(3000)], False, "false"),
 ])
-def test_agreement_is_not_asked_of_maintenance(tmp_path, association, files, fails, maintenance):
+def test_agreement_is_not_asked_of_maintenance(tmp_path, association, files, fails, maintenance, author="someone", bot=""):
     """cla.yaml: only a pull request by owners or members that changes nothing under applications/ skips the agreement."""
     workflow = yaml.safe_load((BASE / ".github" / "workflows" / "cla.yaml").read_text())
     scope, agreement = workflow["jobs"]["agreement"]["steps"][:2]
@@ -217,9 +236,18 @@ def test_agreement_is_not_asked_of_maintenance(tmp_path, association, files, fai
     (tmp_path / "bin" / "gh").chmod(0o755)
     output = tmp_path / "output"
     env = {**os.environ, "PATH": f"{tmp_path / 'bin'}:{os.environ['PATH']}", "GITHUB_OUTPUT": str(output),
-           "REPO": "o/r", "NUMBER": "1", "ASSOCIATION": association, "GH_TOKEN": "x"}
+           "REPO": "o/r", "NUMBER": "1", "ASSOCIATION": association, "GH_TOKEN": "x", "AUTHOR": author, "IMAGE_UPDATE_BOT": bot}
     subprocess.run(["bash", "-e", "-c", scope["run"]], env=env, check=True, capture_output=True)
     assert output.read_text().strip() == f"maintenance={maintenance}"
+
+
+@pytest.mark.parametrize("files, bot, maintenance", [
+    (["config/mikopbx.yaml"], "mikopbx-image-update[bot]", "true"),
+    (["config/mikopbx.yaml", "tools/check"], "mikopbx-image-update[bot]", "false"),
+    (["config/mikopbx.yaml"], "", "false"),
+])
+def test_agreement_is_not_asked_of_the_image_update_app(tmp_path, files, bot, maintenance):
+    test_agreement_is_not_asked_of_maintenance(tmp_path, "NONE", files, False, maintenance, author="mikopbx-image-update[bot]", bot=bot)
 
 
 def test_triage_comment_lists_the_facts():

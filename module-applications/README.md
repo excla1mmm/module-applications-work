@@ -51,6 +51,23 @@ The AI review is the same for free and paid modules: the source is public either
 published, and on what terms, is agreed with MIKO outside the pull request (the verified publisher agreement); the
 application cannot set it.
 
+## Limits of the pilot
+
+- Only **public GitHub** repositories. Private sources are not accepted.
+- Modules admitted before this process are not affected by it.
+- `repo` (where the checks build the module) is not the catalogue's `source_url` ([CONTRIBUTING.md](CONTRIBUTING.md#repo-is-not-the-catalogues-source_url)).
+- [TERMS.md](TERMS.md) and [PUBLISHER_AGREEMENT.md](PUBLISHER_AGREEMENT.md) are **drafts not approved by MIKO**;
+  signatures collected now are for the pilot.
+- Free and paid modules are both accepted ([above](#free-and-paid-modules)).
+- **The publisher is not verified yet.** Until the registration API exists (LIC-613), the publisher card check says
+  `not_checked`, and that is **not a pass**. MIKO's reviewers may approve and merge an application: the merge records
+  that the module was admitted. Nothing registers a module after the merge yet (LIC-614), and when that step is built
+  it must refuse an application whose publisher was not verified; until then the module is registered by hand, after
+  MIKO has checked the publisher itself.
+- Pull requests by the repository's owners and members that change no application (tools, rules, documentation, the
+  image update) are maintenance: they need no terms box and no publisher agreement, and have nothing to test or review.
+  They still need a reviewer's approval.
+
 ## What is in this repository
 
 | Path | What |
@@ -64,7 +81,7 @@ application cannot set it.
 | `tools/check` | The module's life in a fresh MikoPBX container; `tools/package` builds just the ZIP |
 | `config/mikopbx.yaml` | MIKO's trusted test configuration: the stable MikoPBX image by digest, limits, timeouts. `image-update.yaml` proposes a new digest by pull request after the control modules pass on it; a new image makes earlier results stale |
 | `.github/workflows/` | `terms`, `cla` (publisher agreement), `validate` (rules + triage comment), `test` (MikoPBX matrix), `ai-review` (stage 3), `image-update` |
-| `docs/` | How the checks work: [MikoPBX in Docker](docs/mikopbx-docker.md), [AI review](docs/ai-review.md), [security of the checks](docs/security.md), [branch protection](docs/branch-protection.md) |
+| `docs/` | How the checks work: [MikoPBX in Docker](docs/mikopbx-docker.md), [AI review](docs/ai-review.md), [security of the checks](docs/security.md), [branch protection](docs/branch-protection.md), [setting up the repository](docs/setup.md) |
 | `TERMS.md`, `PUBLISHER_AGREEMENT.md` | Drafts: the text is approved by MIKO |
 
 The checks run the same code locally and in CI. The workflows, tools, rules and configuration always come from the

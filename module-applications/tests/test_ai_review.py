@@ -466,3 +466,25 @@ def test_prepare_reports_a_maintenance_pull_request_checked_through_the_api(tmp_
     github.get = lambda path, accept=None: [{"filename": "applications/X/application.yaml"}] if path.startswith("pulls/1/files") else original(path, accept)
     with pytest.raises(ai_review.Skip, match="no provenance"):
         ai_review.prepare(github, 7, tmp_path / "in")
+
+
+def test_prepare_treats_the_image_update_app_as_maintenance_only_for_the_image_pin(tmp_path, package_sha, monkeypatch):
+    github = FakeGitHub(package_sha, run={**FakeGitHub(package_sha).run, "pull_requests": [{"number": 1, "head": {"sha": "b" * 40}}]})
+    del github.files["provenance"]
+    github.pull = {"state": "open", "head": {"sha": "b" * 40}, "author_association": "NONE", "changed_files": 1,
+                   "user": {"login": "mikopbx-image-update[bot]"}}
+    original = github.get
+    files = [{"filename": "config/mikopbx.yaml"}]
+    github.get = lambda path, accept=None: files if path.startswith("pulls/1/files") else original(path, accept)
+    # Without the variable the App is nobody special.
+    monkeypatch.delenv("IMAGE_UPDATE_BOT", raising=False)
+    with pytest.raises(ai_review.Skip, match="no provenance"):
+        ai_review.prepare(github, 7, tmp_path / "in")
+    monkeypatch.setenv("IMAGE_UPDATE_BOT", "mikopbx-image-update[bot]")
+    with pytest.raises(ai_review.NoApplication):
+        ai_review.prepare(github, 7, tmp_path / "in")
+    # Anything besides the image pin is not maintenance, even from the App.
+    files.append({"filename": "tools/check"})
+    with pytest.raises(ai_review.Skip, match="no provenance"):
+        ai_review.prepare(github, 7, tmp_path / "in")
+

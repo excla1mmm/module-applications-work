@@ -38,9 +38,17 @@ gh api "repos/$REPO/pulls/$PR/files?per_page=100" --jq '.[] | .filename, (.previ
 # A pull request from the repository's owners or organisation members that touches no application is maintenance
 # (tools, rules, workflows, documentation, the image update): there is nothing to take or test. Anyone else, or any
 # pull request that also touches applications/, goes through the rules below.
+# The image update's GitHub App (repository variable IMAGE_UPDATE_BOT, docs/branch-protection.md) counts as maintenance
+# only for a pull request that changes config/mikopbx.yaml and nothing else.
 association=$(jq -r .author_association <<< "$pull")
+author=$(jq -r .user.login <<< "$pull")
 if ! grep -q '^applications/' "$RUNNER_TEMP/paths" && [[ $association == OWNER || $association == MEMBER ]]; then
   echo "A maintenance pull request ($association) that changes no application: nothing to check."
+  echo "maintenance=true" >> "$GITHUB_OUTPUT"
+  exit 0
+fi
+if [[ -n ${IMAGE_UPDATE_BOT:-} && $author == "$IMAGE_UPDATE_BOT" && $(cat "$RUNNER_TEMP/paths") == config/mikopbx.yaml ]]; then
+  echo "The image update ($author) changes config/mikopbx.yaml only: nothing to take or test here."
   echo "maintenance=true" >> "$GITHUB_OUTPUT"
   exit 0
 fi

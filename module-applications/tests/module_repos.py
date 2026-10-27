@@ -5,6 +5,7 @@
 
     python3 tests/module_repos.py DIR            create DIR/<Name>.git for every module and print the commits
     eval "$(python3 tests/module_repos.py DIR --env)"
+    python3 tests/module_repos.py DIR --push URL publish them as branches test-modules/<Name> of URL (config/controls.yaml)
 
 The commits are reproducible (fixed author, committer, dates and messages), so their SHAs are written into the test
 applications. With --env it prints the GIT_CONFIG_* variables that make git fetch
@@ -97,8 +98,13 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("target", type=pathlib.Path)
     parser.add_argument("--env", action="store_true", help="print shell exports instead of the commits")
+    parser.add_argument("--push", metavar="URL", help="push each module's history to the branch test-modules/<Name> of URL")
     options = parser.parse_args()
     commits = build(options.target)
+    if options.push:
+        for name in commits:
+            subprocess.run(["git", "--git-dir", str(options.target / f"{name}.git"), "push", "--quiet", options.push,
+                            f"main:refs/heads/test-modules/{name}"], check=True)
     # Bare repositories are also reachable without the .git suffix.
     for name in commits:
         link = options.target / name
