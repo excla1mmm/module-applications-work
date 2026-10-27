@@ -98,6 +98,12 @@ def build(github, repo, pr, validation):
     else:
         rows.append(("Rules", f"pass, rules {md(validation.get('rules_version'))}, schema {md(validation.get('schema_version'))}" +
                      (f"; {len(warnings)} recommendation(s): " + "; ".join(f"[{md(w['rule'])}] {md(w['message'], 120)}" for w in warnings[:5]) if warnings else "")))
+    module_json = (application.get("online") or {}).get("module_json") or {}
+    product, feature = module_json.get("lic_product_id") or 0, module_json.get("lic_feature_id") or 0
+    if module_json:
+        rows.append(("Licence", "free module (no licence ids)" if not (product or feature) else
+                     f"**paid module**: lic_product_id {md(product)}, lic_feature_id {md(feature)}. The tests run without a licence key: "
+                     "what needs a licence is reported as license_required, not checked. Publishing a paid module needs MIKO's verified publisher agreement."))
     registry = application.get("registry") or {}
     rows.append(("Publisher card", f"{md(registry.get('status', 'not checked'))}: {md(registry.get('detail', ''), 200)}"))
 

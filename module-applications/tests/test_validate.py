@@ -191,6 +191,54 @@ def test_package_is_reproducible_and_fills_the_version(tmp_path, repos):
         assert json.loads(archive.read("module.json"))["version"] == info["version"]
 
 
+def test_paid_module_gets_a_test_copy_without_licence_ids(tmp_path, repos):
+    """LIFE-007: the package stays as it is; the test copy differs only in the licence ids, which are 0."""
+    url = "https://github.com/module-applications-test/ModuleAppPaid"
+    commit = repos["ModuleAppPaid"][-1]
+    info = check_install.package(url, commit, tmp_path / "g", tmp_path / "paid.zip", test_copy=tmp_path / "paid.test.zip")
+    plain = check_install.package(url, commit, tmp_path / "h", tmp_path / "plain.zip")
+    assert info["sha256"] == plain["sha256"] and (info["lic_product_id"], info["lic_feature_id"]) == (9001, 9002)
+    assert info["test_copy_sha256"] != info["sha256"]
+    with zipfile.ZipFile(tmp_path / "paid.zip") as paid, zipfile.ZipFile(tmp_path / "paid.test.zip") as copy:
+        assert paid.namelist() == copy.namelist()
+        for name in paid.namelist():
+            if name != "module.json":
+                assert paid.read(name) == copy.read(name)
+        original, tested = json.loads(paid.read("module.json")), json.loads(copy.read("module.json"))
+        assert (tested["lic_product_id"], tested["lic_feature_id"]) == (0, 0)
+        assert {k: v for k, v in tested.items() if not k.startswith("lic_")} == {k: v for k, v in original.items() if not k.startswith("lic_")}
+    # A free module gets no test copy.
+    free = check_install.package("https://github.com/module-applications-test/ModuleAppCheck", repos["ModuleAppCheck"][-1],
+                                 tmp_path / "f", tmp_path / "free.zip", test_copy=tmp_path / "free.test.zip")
+    assert "test_copy_sha256" not in free and not (tmp_path / "free.test.zip").exists()
+
+
+@pytest.mark.parametrize("value, ok", [(None, True), (0, True), (306, True), ("306", False), ("0", False), (-1, False), (1.5, False), (True, False)])
+def test_licence_ids_must_be_whole_numbers(tmp_path, repos, value, ok):
+    """MJ-005: a paid module is accepted; a licence id must be absent or a whole number ≥ 0."""
+    work = tmp_path / "module"
+    shutil.copytree(HERE / "modules" / "ModuleAppCheck", work)
+    module = json.loads((work / "module.json").read_text())
+    if value is not None:
+        module["lic_feature_id"] = value
+    (work / "module.json").write_text(json.dumps(module))
+    module_repos.git(work, "init", "--quiet")
+    module_repos.git(work, "add", "--all")
+    module_repos.git(work, "commit", "--quiet", "--no-gpg-sign", "-m", "x")
+    sha = module_repos.git(work, "rev-parse", "HEAD")
+    # Publish it next to the test modules, where https://github.com/module-applications-test/ leads (the repos fixture).
+    target = pathlib.Path(os.environ["GIT_CONFIG_KEY_0"].removeprefix("url.file://").removesuffix("/.insteadOf"))
+    name = f"LicenceIds{tmp_path.name.replace('_', '')}"
+    subprocess.run(["git", "clone", "--quiet", "--bare", str(work), str(target / name)], check=True, capture_output=True)
+    root = tmp_path / "root"
+    app = yaml.safe_load((HERE / "fixtures" / "good" / "control" / "applications" / "ModuleAppCheck" / "application.yaml").read_text())
+    (root / "applications" / "ModuleAppCheck").mkdir(parents=True)
+    (root / "applications" / "ModuleAppCheck" / "application.yaml").write_text(
+        yaml.safe_dump({**app, "repo": f"https://github.com/module-applications-test/{name}", "commit": sha}))
+    rules = [rule for rule, _ in problems_of(validate.validate(root, online=True))]
+    assert ("MJ-005" not in rules) == ok
+
+
 def test_fetch_refuses_a_branch_name(tmp_path, repos):
     with pytest.raises(check_install.Failed):
         check_install.package("https://github.com/module-applications-test/ModuleAppCheck", "main", tmp_path / "g", tmp_path / "x.zip")

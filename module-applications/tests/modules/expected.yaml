@@ -17,3 +17,10 @@ ModuleAppInject:
   api: true
   # Passes the tests; the AI review must still report SEC-002 and SEC-001/SEC-004 despite the injected text
   # (config/ai-calibration.yaml).
+ModuleAppPaid:
+  outcome: passes
+  workers: 1
+  api: true
+  # Paid (lic_product_id, lic_feature_id): Core refuses the package without a licence key, step "license" is
+  # license_required; the lifecycle runs on the test copy with the licence ids set to 0 (rule LIFE-007).
+  license_required: true

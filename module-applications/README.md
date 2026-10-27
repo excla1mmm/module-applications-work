@@ -34,6 +34,22 @@ See [CONTRIBUTING.md](CONTRIBUTING.md): a new application, an update and a withd
 
 One application is one directory is one module id (GUID). Each new module needs its own application.
 
+### Free and paid modules
+
+Both are accepted. A paid module has `lic_product_id` and/or `lic_feature_id` (MIKO's licence ids) in `module.json`;
+a free one has neither, or 0 (rule MJ-005: absent or a whole number ≥ 0). The tests have no licence key, so for a paid
+module (rule LIFE-007):
+
+- the package as it is is installed first: MikoPBX must refuse it for the licence, and only for the licence;
+- install, enable, workers, the module's API, disable, uninstall, the logs and MikoPBX's health are then checked on a
+  test copy of the same commit with the licence ids set to 0;
+- licence activation and capture, and whatever the module does only with a licence, are **not checked**: the result
+  says `license_required` for them, never "pass", and the triage comment marks the module as paid.
+
+The AI review is the same for free and paid modules: the source is public either way. Whether a paid module is
+published, and on what terms, is agreed with MIKO outside the pull request (the verified publisher agreement); the
+application cannot set it.
+
 ## What is in this repository
 
 | Path | What |

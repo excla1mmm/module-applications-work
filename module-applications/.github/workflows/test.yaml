@@ -186,6 +186,8 @@ jobs:
             *) result="could not be checked: tools/check exited $code" ;;
           esac
           echo "\`$MODULE_ID\` on $ARCH $result." >> "$GITHUB_STEP_SUMMARY"
+          # A paid module: say what the tests could not check without a licence key (rule LIFE-007).
+          jq -r 'select(.license_required) | "Paid module, **license_required**: \(.license_required)."' result.json >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
           [ "$code" = 0 ] || echo "::error::$MODULE_ID on $ARCH $result."
           exit "$code"
 

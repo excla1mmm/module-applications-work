@@ -14,6 +14,10 @@ a pull request that touches them together with an application is rejected by the
 - You have a publisher account in the MIKO cabinet; `publisher_id` is its id. It only identifies the card the checks
   compare with: it does not prove who you are. MIKO checks that you are the confirmed publisher.
 - `support_email` is a public address. It is the same in `module.json`, in the application and on your publisher card.
+- Free and paid modules are both accepted. A paid module keeps its `lic_product_id`/`lic_feature_id` in `module.json`
+  (whole numbers); the tests check it without a licence key and report what needs one as `license_required`
+  ([README.md](README.md#free-and-paid-modules)). Publishing a paid module also needs the verified publisher agreement
+  with MIKO, agreed outside the pull request.
 
 ## A new module
 

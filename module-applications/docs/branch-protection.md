@@ -51,8 +51,10 @@ workflow to open its pull request at all).
 ## In the sandbox (2026-10-27)
 
 Ruleset `main: applications gate` (id 25947319) on excla1mmm/module-applications follows the table with an **empty
-bypass list**, and two differences for a one-person sandbox: "Require approval of the most recent reviewable push" is
-**off** (turn it on in the real repository) and code owner review is off (no CODEOWNERS yet).
+bypass list**, and differences for a one-person sandbox: **0 required approvals** (since 2026-10-27, M04: GitHub does
+not let the only account approve its own pull request, so with 1 nothing could be merged; the real repository keeps 1 or
+more), "Require approval of the most recent reviewable push" is **off** and code owner review is off (no CODEOWNERS
+yet). The five required checks stay required. The checks below were made with 1 approval required.
 
 **What went wrong first.** The ruleset was created at 09:52Z with option A (repository admin, pull requests only).
 At 10:05Z pull request #6 was merged into `main` through that bypass, by hand, while its head 90adbc2 had no `AI review`

@@ -29,6 +29,9 @@ DB = "/cf/conf/mikopbx.db"
 MODULES_DIR = "/storage/usbdisk1/mikopbx/custom_modules"
 LOGS = ("/storage/usbdisk1/mikopbx/log/system/messages", "/storage/usbdisk1/mikopbx/log/php")
 VERSION_PLACEHOLDER = "%ModuleVersion%"
+LICENCE_KEYS = ("lic_product_id", "lic_feature_id")
+# Core's English messages when a paid module meets a MikoPBX without a licence key (Common/Messages/en/Modules.php).
+LICENCE_REFUSAL = re.compile(r"license key to activate the license|activating a license|DisabledByLicense|license", re.I)
 # A log line that means code crashed. Only lines that also name the module count against it.
 CRASH = re.compile(r"PHP (Fatal|Parse) error|Fatal error|Uncaught|ErrorException|Throwable|Segmentation fault", re.I)
 
@@ -78,19 +81,23 @@ def fetch(repo, commit, git_dir, timeout):
     return git
 
 
-def package(repo, commit, git_dir, out_path, timeout=120):
-    """Build the module ZIP from the commit and return {sha256, bytes, files, version}.
+def package(repo, commit, git_dir, out_path, timeout=120, test_copy=None):
+    """Build the module ZIP from the commit and return {sha256, bytes, files, version, lic_product_id, lic_feature_id}.
 
     The ZIP is reproducible: entries sorted, timestamps set to the commit time, permissions 0644 or 0755 only.
     %ModuleVersion% in module.json becomes 0.0.0-<12 hex of the commit>, so the version names the commit.
+
+    For a paid module (lic_* > 0) and test_copy set, a second ZIP is written there: the same files, with
+    lic_product_id and lic_feature_id set to 0 in module.json, so the module can go through its life in a MikoPBX
+    without a licence key (rule LIFE-007). Its sha256 is returned as test_copy_sha256; the package is still out_path.
     """
     git = fetch(repo, commit, git_dir, timeout)
     stamp = int(subprocess.run([*git, "show", "-s", "--format=%ct", commit], capture_output=True, check=True).stdout)
     when = time.gmtime(max(stamp, 315532800))[:6]  # ZIP cannot store dates before 1980
     archive = subprocess.run([*git, "archive", "--format=tar", commit], capture_output=True, check=True).stdout
-    version = None
-    files = 0
-    with tarfile.open(fileobj=io.BytesIO(archive)) as tar, zipfile.ZipFile(out_path, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as zip_file:
+    entries = []
+    module = {}
+    with tarfile.open(fileobj=io.BytesIO(archive)) as tar:
         for member in sorted(tar.getmembers(), key=lambda m: m.name):
             if member.isdir():
                 continue
@@ -100,17 +107,45 @@ def package(repo, commit, git_dir, out_path, timeout=120):
             if member.name == "module.json":
                 text = data.decode("utf-8")
                 module = json.loads(text)
-                version = module.get("version")
-                if version == VERSION_PLACEHOLDER:
-                    version = f"0.0.0-{commit[:12]}"
-                    data = text.replace(VERSION_PLACEHOLDER, version).encode("utf-8")
+                if module.get("version") == VERSION_PLACEHOLDER:
+                    data = text.replace(VERSION_PLACEHOLDER, f"0.0.0-{commit[:12]}").encode("utf-8")
+            entries.append((member, data))
+    version = module.get("version")
+    if version == VERSION_PLACEHOLDER:
+        version = f"0.0.0-{commit[:12]}"
+    licence = {key: licence_id(module, key) for key in LICENCE_KEYS}
+    info = {**write_zip(entries, when, out_path), "files": len(entries), "version": version, **licence}
+    if test_copy and any(licence.values()):
+        unlicensed = [(m, without_licence(d) if m.name == "module.json" else d) for m, d in entries]
+        info["test_copy_sha256"] = write_zip(unlicensed, when, test_copy)["sha256"]
+    return info
+
+
+def write_zip(entries, when, out_path):
+    with zipfile.ZipFile(out_path, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as zip_file:
+        for member, data in entries:
             info = zipfile.ZipInfo(member.name, date_time=when)
             info.external_attr = (0o100755 if member.mode & 0o111 else 0o100644) << 16
             info.compress_type = zipfile.ZIP_DEFLATED
             zip_file.writestr(info, data)
-            files += 1
     data = open(out_path, "rb").read()
-    return {"sha256": hashlib.sha256(data).hexdigest(), "bytes": len(data), "files": files, "version": version}
+    return {"sha256": hashlib.sha256(data).hexdigest(), "bytes": len(data)}
+
+
+def licence_id(module, key):
+    """The module's lic_* id as Core reads it (absent is 0); tools/validate.py has already refused anything but an int."""
+    value = module.get(key)
+    return value if isinstance(value, int) and not isinstance(value, bool) else 0
+
+
+def without_licence(data):
+    """module.json with lic_product_id and lic_feature_id set to 0, the rest of the text untouched."""
+    text = data.decode("utf-8")
+    for key in LICENCE_KEYS:
+        text = re.sub(rf'("{key}"\s*:\s*)\d+', r"\g<1>0", text)
+    if any(licence_id(json.loads(text), key) for key in LICENCE_KEYS):
+        raise Failed("cannot set the licence ids in module.json to 0 for the test copy")
+    return text.encode("utf-8")
 
 
 # --- The MikoPBX container ---------------------------------------------------------------------------------------
@@ -323,14 +358,17 @@ class Steps:
         self.record(name, "pass", detail, time.monotonic() - start, **extra)
 
 
-def lifecycle(pbx, module_id, zip_path, previous_zip, timeouts, steps, expect, evidence):
+def lifecycle(pbx, module_id, zip_path, previous_zip, timeouts, steps, expect, evidence, licensed_zip=None):
     """Install (or update), enable, check, disable, uninstall, check the PBX. Raise Failed on the first failure.
+
+    For a paid module, zip_path (and previous_zip) are the test copies without licence ids and licensed_zip is the
+    package itself: it is installed first to see Core refuse it for the licence, and only for the licence (LIFE-007).
 
     Whatever happens, `evidence` gets the module's log lines and the end of the system log of this run.
     """
     sizes = {}
     try:
-        _lifecycle(pbx, module_id, zip_path, previous_zip, timeouts, steps, expect, sizes)
+        _lifecycle(pbx, module_id, zip_path, previous_zip, timeouts, steps, expect, sizes, licensed_zip)
     finally:
         if sizes:
             try:
@@ -346,7 +384,7 @@ def module_needles(module_id):
     return (f"Modules\\{module_id}\\", f"Modules\\\\{module_id}\\\\", f"custom_modules/{module_id}/", module_id)
 
 
-def _lifecycle(pbx, module_id, zip_path, previous_zip, timeouts, steps, expect, sizes):
+def _lifecycle(pbx, module_id, zip_path, previous_zip, timeouts, steps, expect, sizes, licensed_zip=None):
 
     def boot():
         seconds = pbx.boot(timeouts["boot"])
@@ -354,6 +392,11 @@ def _lifecycle(pbx, module_id, zip_path, previous_zip, timeouts, steps, expect, 
         return f"system:ping answered after {seconds}s", {}
 
     steps.run("boot", boot)
+
+    if licensed_zip is not None:
+        start = time.monotonic()
+        detail, extra = licence_refusal(pbx, module_id, licensed_zip, timeouts)
+        steps.record("license", "license_required", detail, time.monotonic() - start, **extra)
 
     if previous_zip is None:
         steps.record("update", "not_applicable", "first version: there is no previously approved commit to update from")
@@ -485,3 +528,38 @@ def _lifecycle(pbx, module_id, zip_path, previous_zip, timeouts, steps, expect, 
         return "system:ping answers, Asterisk is up", {}
 
     steps.run("health", health)
+
+
+def licence_refusal(pbx, module_id, licensed_zip, timeouts):
+    """Install the paid package as it is and show that Core refuses it for the licence alone. Leave no trace of it.
+
+    Core without a licence key refuses to install a module with lic_product_id > 0 and keeps a module with
+    lic_feature_id > 0 disabled (DisabledByLicense). Any other refusal is the module's fault and fails the run.
+    """
+    not_checked = "licence activation and capture, and whatever the module does only with a licence"
+    try:
+        pbx.install(licensed_zip, module_id, timeouts["operation"])
+    except Failed as failure:
+        if not LICENCE_REFUSAL.search(str(failure)):
+            raise Failed(f"the package itself is refused, and not for the licence: {failure}") from None
+        leftover = pbx.module_row(module_id) is not None or pbx.module_dir_exists(module_id)
+        if leftover:
+            raise Failed(f"Core refused the package for the licence but left the module behind: {failure}")
+        return (f"without a licence key Core refuses to install the package: {str(failure)[:300]}. Not checked: {not_checked}. "
+                "The steps below run on a test copy with lic_product_id and lic_feature_id set to 0"), {"refusal": str(failure)[:600]}
+    # Installed: a feature-only module. Enabling must be what the licence stops.
+    try:
+        pbx.operation(module_id, "enable", {}, timeouts["operation"])
+        refusal = None
+    except Failed as failure:
+        refusal = str(failure)
+    row = pbx.module_row(module_id)
+    reason = pbx.sh(f"sqlite3 {DB} \"select disableReason from m_PbxExtensionModules where uniqid='{module_id}'\"", check=False).strip()
+    pbx.operation(module_id, "uninstall", {"keepSettings": False}, timeouts["operation"])
+    if row is not None and not row["disabled"]:
+        raise Failed("the paid package installed and enabled without a licence key: its licence ids do nothing")
+    if refusal and not LICENCE_REFUSAL.search(refusal) and not LICENCE_REFUSAL.search(reason):
+        raise Failed(f"enabling the package itself fails, and not for the licence: {refusal}")
+    because = reason or refusal or "disabled"
+    return (f"without a licence key the package installs but Core keeps it disabled ({because[:300]}). Not checked: {not_checked}. "
+            "The steps below run on a test copy with lic_product_id and lic_feature_id set to 0"), {"refusal": because[:600]}

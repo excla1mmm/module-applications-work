@@ -26,6 +26,7 @@ APPLICATIONS = {
     "ModuleAppCheck": HERE / "fixtures" / "good" / "control" / "applications" / "ModuleAppCheck",
     "ModuleAppBroken": HERE / "fixtures" / "good" / "broken-module" / "applications" / "ModuleAppBroken",
     "ModuleAppProbe": HERE / "fixtures" / "good" / "probe-module" / "applications" / "ModuleAppProbe",
+    "ModuleAppPaid": HERE / "fixtures" / "good" / "paid-module" / "applications" / "ModuleAppPaid",
 }
 CODES = {"passes": 0, "fails": 1}
 
@@ -65,3 +66,9 @@ def test_module_gets_the_expected_outcome(module_id, environment, tmp_path):
         assert steps["update"]["status"] == ("pass" if "update_from" in expected else "not_applicable")
     else:
         assert any(step["status"] == "fail" for step in run["steps"])
+    if expected.get("license_required"):
+        # LIFE-007: refused for the licence, never a pass; the lifecycle ran on the test copy.
+        assert steps["license"]["status"] == "license_required" and "license" in steps["license"]["refusal"].lower()
+        assert result["license_required"] and result["package"]["test_copy_sha256"] != result["package"]["sha256"]
+    else:
+        assert "license" not in steps and "license_required" not in result

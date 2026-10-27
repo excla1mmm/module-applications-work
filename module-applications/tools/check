@@ -23,6 +23,9 @@ This runs the following steps and prints a JSON result on stdout (also written t
        "not applicable" (first version).
     6. Install through the REST API, php -l every PHP file, enable, look for the module's workers and API, disable,
        uninstall, scan the logs for the module's errors, and check that MikoPBX still works.
+       A paid module (lic_product_id or lic_feature_id > 0, rule LIFE-007): its package is installed first to see Core
+       refuse it for the licence alone (step "license", status license_required); the steps above then run on a test
+       copy with the licence ids set to 0. What needs a licence is reported as not checked, never as passed.
     7. Remove the container and its network.
 
 Security note: the module's PHP runs only inside the MikoPBX container, but that container runs on your Docker. Check
@@ -135,20 +138,28 @@ def main():
         # 2-3. The package.
         try:
             def build():
-                info = check_install.package(application["repo"], application["commit"], work / "git", work / f"{module_id}.zip", config["timeouts"]["clone"])
+                info = check_install.package(application["repo"], application["commit"], work / "git", work / f"{module_id}.zip",
+                                             config["timeouts"]["clone"], test_copy=work / f"{module_id}.test.zip")
                 result["package"] = info
-                return f"{info['files']} files, {info['bytes']} bytes, sha256 {info['sha256']}", {}
+                paid = f"; paid module (lic_product_id {info['lic_product_id']}, lic_feature_id {info['lic_feature_id']}): test copy without licence ids, sha256 {info['test_copy_sha256']}" if "test_copy_sha256" in info else ""
+                return f"{info['files']} files, {info['bytes']} bytes, sha256 {info['sha256']}{paid}", {}
 
             steps.run("package", build)
+            paid = "test_copy_sha256" in result["package"]
             previous_zip = None
             if options.previous_commit:
                 def build_previous():
-                    info = check_install.package(application["repo"], options.previous_commit, work / "git-previous", work / "previous.zip", config["timeouts"]["clone"])
+                    info = check_install.package(application["repo"], options.previous_commit, work / "git-previous", work / "previous.zip",
+                                                 config["timeouts"]["clone"], test_copy=work / "previous.test.zip")
                     result["previous_package"] = {"commit": options.previous_commit, **info}
                     return f"previous commit {options.previous_commit[:12]}, sha256 {info['sha256']}", {}
 
                 steps.run("package_previous", build_previous)
-                previous_zip = work / "previous.zip"
+                previous_zip = work / ("previous.test.zip" if "test_copy_sha256" in result["previous_package"] else "previous.zip")
+            if paid:
+                result["license_required"] = ("licence activation and capture, and whatever the module does only with a licence: "
+                                              "not checked (no licence key in the tests); install, enable, disable, uninstall ran on a test copy "
+                                              "with lic_product_id and lic_feature_id set to 0")
         except Failed:
             return finish("fails", 1)
         except Broken:
@@ -169,7 +180,9 @@ def main():
 
                 run_steps.run("container", start_container)
                 run["evidence"] = {}
-                check_install.lifecycle(pbx, module_id, work / f"{module_id}.zip", previous_zip, config["timeouts"], run_steps, expect, run["evidence"])
+                check_install.lifecycle(pbx, module_id, work / (f"{module_id}.test.zip" if paid else f"{module_id}.zip"), previous_zip,
+                                        config["timeouts"], run_steps, expect, run["evidence"],
+                                        licensed_zip=work / f"{module_id}.zip" if paid else None)
                 run["outcome"] = "passes"
                 run["retries"] = pbx.retries
             except Failed:

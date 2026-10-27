@@ -9,13 +9,13 @@ names a commit of it. For a fuller example (web pages, models, AMI worker) see
 
 ## What MikoPBX requires (mandatory) and what is advice (recommended)
 
-The full list, with an id for each rule, is [rules/rules.yaml](../rules/rules.yaml) (rules version `0.2.2`); the
+The full list, with an id for each rule, is [rules/rules.yaml](../rules/rules.yaml) (rules version `0.3.0`); the
 application format is [schema/application.schema.json](../schema/application.schema.json) (schema version 1).
 The mandatory part for the module itself:
 
 | File | Rule | What |
 |---|---|---|
-| `module.json` at the repository root | PKG-001, MJ-001..005 | `moduleUniqueID` = your module id (`Module` + letters/digits), `version` like `1.2.3`, `min_pbx_version` like `2024.1.0` (at least 2020.2.468), no `lic_product_id`/`lic_feature_id` |
+| `module.json` at the repository root | PKG-001, MJ-001..005 | `moduleUniqueID` = your module id (`Module` + letters/digits), `version` like `1.2.3`, `min_pbx_version` like `2024.1.0` (at least 2020.2.468); `lic_product_id`/`lic_feature_id` absent or 0 for a free module, MIKO's whole-number ids for a paid one |
 | `Setup/PbxExtensionSetup.php` | PKG-003, CODE-001 | `namespace Modules\<id>\Setup; class PbxExtensionSetup` (extending `PbxExtensionSetupBase` is the easy way) |
 | `Lib/<X>Conf.php` (if you use hooks, workers or an API) | CODE-003 | `X` = id without `Module`; `extends ConfigClass`; loads on the current Core |
 | every PHP file | CODE-002, LIFE-003 | namespace `Modules\<id>\...` matching its path; `php -l` passes; no fatal errors |

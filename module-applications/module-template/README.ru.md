@@ -9,13 +9,13 @@
 
 ## Что обязательно для MikoPBX, а что рекомендация
 
-Полный список требований с идентификаторами — [rules/rules.yaml](../rules/rules.yaml) (версия правил `0.2.2`), формат
+Полный список требований с идентификаторами — [rules/rules.yaml](../rules/rules.yaml) (версия правил `0.3.0`), формат
 заявки — [schema/application.schema.json](../schema/application.schema.json) (версия схемы 1). Обязательное для самого
 модуля:
 
 | Файл | Правило | Что |
 |---|---|---|
-| `module.json` в корне репозитория | PKG-001, MJ-001..005 | `moduleUniqueID` = идентификатор модуля (`Module` + буквы и цифры), `version` вида `1.2.3`, `min_pbx_version` вида `2024.1.0` (не ниже 2020.2.468), без `lic_product_id`/`lic_feature_id` |
+| `module.json` в корне репозитория | PKG-001, MJ-001..005 | `moduleUniqueID` = идентификатор модуля (`Module` + буквы и цифры), `version` вида `1.2.3`, `min_pbx_version` вида `2024.1.0` (не ниже 2020.2.468); `lic_product_id`/`lic_feature_id` нет или 0 у бесплатного модуля, целые идентификаторы MIKO у платного |
 | `Setup/PbxExtensionSetup.php` | PKG-003, CODE-001 | `namespace Modules\<id>\Setup; class PbxExtensionSetup` (проще всего — наследовать `PbxExtensionSetupBase`) |
 | `Lib/<X>Conf.php` (если нужны хуки, воркеры или API) | CODE-003 | `X` — идентификатор без `Module`; `extends ConfigClass`; загружается на текущем Core |
 | каждый PHP-файл | CODE-002, LIFE-003 | namespace `Modules\<id>\...` по пути файла; `php -l` проходит; нет fatal error |

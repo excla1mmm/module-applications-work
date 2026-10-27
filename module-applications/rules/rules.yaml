@@ -13,7 +13,7 @@
 # Evidence: Core = mikopbx/Core develop @ e7e2109 (2026-10-27), paths under src/. Template = mikopbx/ModuleTemplate
 # @ e056e8b. Spec = Core branch docs/third-party-modules-spec, docs/superpowers/specs/2026-09-21-third-party-modules-design.md.
 
-rules_version: "0.2.2"
+rules_version: "0.3.0"
 
 rules:
   # --- The application (applications/<module_id>/application.yaml) ---------------------------------------------
@@ -139,8 +139,8 @@ rules:
     level: mandatory
     check: validate
     status: accepted
-    statement: lic_product_id and lic_feature_id are absent or 0 (a community module needs no licence key to install or enable).
-    evidence: Core Modules/Setup/PbxExtensionSetupBase.php:168-179; Modules/PbxExtensionState.php:103-108
+    statement: lic_product_id and lic_feature_id are absent or whole numbers ≥ 0. 0 (or absent) is a free module; a positive id is a paid module licensed by MIKO. Both are accepted; whether a paid module is published is MIKO's decision (the verified publisher agreement), outside the pull request.
+    evidence: Core (image 2026.6.34) Modules/Setup/PbxExtensionSetupBase.php:168-179,276-287; Modules/PbxExtensionState.php:103-108,156-177
   - id: MJ-006
     level: recommended
     check: validate
@@ -244,3 +244,9 @@ rules:
     check: test
     status: draft
     statement: The previous approved commit, if any, installs and is updated in place to commit, keeping the module enabled.
+  - id: LIFE-007
+    level: mandatory
+    check: test
+    status: accepted
+    statement: A paid module (lic_product_id or lic_feature_id > 0) is refused by Core without a licence key only for the licence (on install "The license key to activate the license for the module has not been installed", on enable DisabledByLicense). LIFE-001..006 then run on a test copy whose module.json has lic_product_id and lic_feature_id set to 0; licence activation and whatever the module does only with a licence are reported as license_required, never as a pass. No licence key is used in the tests.
+    evidence: Core (image 2026.6.34) Modules/Setup/PbxExtensionSetupBase.php:204-213,276-287; Modules/PbxExtensionState.php:154-177; Common/Messages/en/Modules.php:43

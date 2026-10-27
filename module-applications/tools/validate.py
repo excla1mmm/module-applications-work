@@ -300,7 +300,7 @@ def check_repository(result, fetched):
     if not isinstance(module, dict):
         result.problem("MJ-001", "module.json must be a JSON object")
         return
-    result.online["module_json"] = {key: module.get(key) for key in ("moduleUniqueID", "version", "min_pbx_version", "developer", "support_email")}
+    result.online["module_json"] = {key: module.get(key) for key in ("moduleUniqueID", "version", "min_pbx_version", "developer", "support_email", "lic_product_id", "lic_feature_id")}
 
     unique_id = module.get("moduleUniqueID")
     if not isinstance(unique_id, str) or not NAME.fullmatch(unique_id):
@@ -325,8 +325,9 @@ def check_repository(result, fetched):
     if not (isinstance(version, str) and (version == VERSION_PLACEHOLDER or MODULE_VERSION.fullmatch(version))):
         result.problem("MJ-004", f"module.json version {printable(repr(version))} must be a version like 1.2.3 (or {VERSION_PLACEHOLDER}, which the build replaces)")
     for key in ("lic_product_id", "lic_feature_id"):
-        if module.get(key) not in (None, 0, "0", ""):
-            result.problem("MJ-005", f"module.json {key} must be absent or 0: a module from an application installs without a licence key")
+        value = module.get(key)
+        if value is not None and (isinstance(value, bool) or not isinstance(value, int) or value < 0):
+            result.problem("MJ-005", f"module.json {key} {printable(repr(value))} must be absent or a whole number ≥ 0 (0 for a free module, MIKO's product or feature id for a paid one)")
     if not (isinstance(module.get("developer"), str) and module["developer"].strip()):
         result.warning("MJ-006", "module.json developer should name who develops the module")
     module_email = module.get("support_email")
