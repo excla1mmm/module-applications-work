@@ -55,7 +55,10 @@ def test_module_gets_the_expected_outcome(module_id, environment, tmp_path):
     assert result["outcome"] == expected["outcome"]
     assert result["package"]["sha256"] and result["commit"] == yaml.safe_load((APPLICATIONS[module_id] / "application.yaml").read_text())["commit"]
     [run] = result["runs"]
-    assert run["image"]["digest"].startswith("sha256:") and run["image"]["isolation"]["host_firewalled"]
+    assert run["image"]["digest"].startswith("sha256:")
+    # Docker Desktop (macOS) runs containers in its own VM, so there is no host iptables to set; CI is Linux.
+    if sys.platform.startswith("linux"):
+        assert run["image"]["isolation"]["host_firewalled"]
     steps = {step["name"]: step for step in run["steps"]}
     if expected["outcome"] == "passes":
         assert steps["health"]["status"] == "pass"
