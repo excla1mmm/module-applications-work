@@ -9,7 +9,7 @@
 
 ## Что обязательно для MikoPBX, а что рекомендация
 
-Полный список требований с идентификаторами — [rules/rules.yaml](../rules/rules.yaml) (версия правил `0.2.1`), формат
+Полный список требований с идентификаторами — [rules/rules.yaml](../rules/rules.yaml) (версия правил `0.2.2`), формат
 заявки — [schema/application.schema.json](../schema/application.schema.json) (версия схемы 1). Обязательное для самого
 модуля:
 

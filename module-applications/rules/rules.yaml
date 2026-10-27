@@ -13,7 +13,7 @@
 # Evidence: Core = mikopbx/Core develop @ e7e2109 (2026-10-27), paths under src/. Template = mikopbx/ModuleTemplate
 # @ e056e8b. Spec = Core branch docs/third-party-modules-spec, docs/superpowers/specs/2026-09-21-third-party-modules-design.md.
 
-rules_version: "0.2.1"
+rules_version: "0.2.2"
 
 rules:
   # --- The application (applications/<module_id>/application.yaml) ---------------------------------------------
@@ -171,7 +171,7 @@ rules:
     level: recommended
     check: validate
     status: accepted
-    statement: Setup implements uninstallModule(bool $keepSettings).
+    statement: Setup implements uninstallModule(bool $keepSettings), itself or by extending PbxExtensionSetupBase (which does).
     evidence: Core PBXCoreREST/Lib/Modules/UninstallModuleAction.php:162-176
   - id: CODE-005
     level: recommended
