@@ -1,0 +1,216 @@
+{
+  "module_id": "ModuleAppProbe",
+  "started_at": "2026-10-27T06:17:03+00:00",
+  "rules_version": "0.1.0",
+  "schema_version": 1,
+  "config_version": 1,
+  "architecture": "arm64",
+  "steps": [
+    {
+      "name": "validate",
+      "status": "pass",
+      "detail": "rules 0.1.0, 0 recommendation(s)",
+      "seconds": 0.1
+    },
+    {
+      "name": "package",
+      "status": "pass",
+      "detail": "5 files, 2940 bytes, sha256 770c23ea9b9463a4ebf0ae3433a20b25ed37670d327568ea324780abcbb42c52",
+      "seconds": 0.1
+    }
+  ],
+  "publisher_id": 1,
+  "repo": "https://github.com/module-applications-test/ModuleAppProbe",
+  "commit": "471c34cdf88c10d695286d83a62cc1aeb4f074a6",
+  "validation": {
+    "module_id": "ModuleAppProbe",
+    "ok": true,
+    "repo": "https://github.com/module-applications-test/ModuleAppProbe",
+    "commit": "471c34cdf88c10d695286d83a62cc1aeb4f074a6",
+    "publisher_id": 1,
+    "problems": [],
+    "warnings": [],
+    "online": {
+      "entries": 5,
+      "bytes": 5622,
+      "module_json": {
+        "moduleUniqueID": "ModuleAppProbe",
+        "version": "1.0.0",
+        "min_pbx_version": "2024.1.0",
+        "developer": "module-applications pilot",
+        "support_email": "module-applications@example.com"
+      }
+    },
+    "registry": {
+      "status": "not_checked",
+      "detail": "the licence server API (LIC-613) does not exist yet: the publisher card and module_id ownership are checked at registration",
+      "source": "stub"
+    }
+  },
+  "package": {
+    "sha256": "770c23ea9b9463a4ebf0ae3433a20b25ed37670d327568ea324780abcbb42c52",
+    "bytes": 2940,
+    "files": 5,
+    "version": "1.0.0"
+  },
+  "runs": [
+    {
+      "mikopbx_version": "2026.6.34",
+      "steps": [
+        {
+          "name": "container",
+          "status": "pass",
+          "detail": "docker.io/mikopbx/mikopbx@sha256:ff5cc0238a4e… (arm64), network --internal",
+          "seconds": 1.9
+        },
+        {
+          "name": "boot",
+          "status": "pass",
+          "detail": "system:ping answered after 17s",
+          "seconds": 32.5
+        },
+        {
+          "name": "update",
+          "status": "not_applicable",
+          "detail": "first version: there is no previously approved commit to update from",
+          "seconds": 0.0
+        },
+        {
+          "name": "install",
+          "status": "pass",
+          "detail": "registered, version 1.0.0, disabled",
+          "seconds": 2.6,
+          "version": "1.0.0"
+        },
+        {
+          "name": "php_lint",
+          "status": "pass",
+          "detail": "every PHP file parses (php -l on the image's PHP)",
+          "seconds": 0.1
+        },
+        {
+          "name": "enable",
+          "status": "pass",
+          "detail": "enabled",
+          "seconds": 2.3
+        },
+        {
+          "name": "services",
+          "status": "pass",
+          "detail": "0 worker process(es)",
+          "seconds": 92.4,
+          "workers": []
+        },
+        {
+          "name": "module_api",
+          "status": "pass",
+          "detail": "the probe found no secret, no host file and no route out",
+          "seconds": 3.1,
+          "response": {
+            "result": true,
+            "data": {
+              "module": "ModuleAppProbe",
+              "secret_like_env": [],
+              "env_names": [
+                "HOME",
+                "HOSTNAME",
+                "LD_PRELOAD",
+                "MALLOC_CONF",
+                "MIKOPBX_VERSION",
+                "PATH",
+                "PWD",
+                "SHLVL",
+                "TZ",
+                "fpm.conf)",
+                "ocess /usr/sbin/nginx"
+              ],
+              "files": [],
+              "mounts": [],
+              "network": {
+                "metadata 169.254.169.254:80": false,
+                "docker host 172.17.0.1:80": false,
+                "docker host 172.17.0.1:2375": false,
+                "internet 1.1.1.1:443": false,
+                "internet 140.82.112.3:443 (github.com)": false,
+                "private 10.0.0.1:80": false,
+                "private 192.168.0.1:80": false,
+                "host bridge 172.22.0.1:22": false,
+                "host bridge 172.22.0.1:80": false,
+                "host bridge 172.22.0.1:2375": false,
+                "host bridge 172.22.0.1:8000": false
+              },
+              "dns_github": null
+            },
+            "messages": [],
+            "function": "",
+            "processor": "Modules\\ModuleAppProbe\\Lib\\AppProbeConf::moduleRestAPICallback",
+            "pid": 39087,
+            "meta": {
+              "timestamp": "2026-10-27T09:19:18+03:00",
+              "hash": "5d0b1860b62211ab5ed70d1540021a202a26da6c"
+            }
+          }
+        },
+        {
+          "name": "disable",
+          "status": "pass",
+          "detail": "disabled, no worker left",
+          "seconds": 2.3
+        },
+        {
+          "name": "uninstall",
+          "status": "pass",
+          "detail": "unregistered, directory removed",
+          "seconds": 2.3
+        },
+        {
+          "name": "logs",
+          "status": "pass",
+          "detail": "no fatal error or uncaught exception from the module",
+          "seconds": 0.1,
+          "log_bytes": 1863
+        },
+        {
+          "name": "health",
+          "status": "pass",
+          "detail": "system:ping answers, Asterisk is up",
+          "seconds": 0.1
+        }
+      ],
+      "image": {
+        "image": "docker.io/mikopbx/mikopbx",
+        "tag": "2026.6.34",
+        "digest": "sha256:ff5cc0238a4e170bfbf8c0be9a59b58c8affb6fb24b36d1506f5fc0cb41f7691",
+        "platform_digest": "sha256:3af27a8ecc070108bdde4a2e3939407eeda0574896e55a547ee221973d0b6a6c",
+        "architecture": "arm64",
+        "mikopbx_version": "2026.6.34",
+        "isolation": {
+          "network": "docker --internal",
+          "bridge": "br-154aaac0d0a8",
+          "host_firewalled": false
+        }
+      },
+      "evidence": {
+        "module_log_lines": [
+          "2026-10-27 09:17:40 daemon.warning php.backend[1562]:  Module operation started: {\"operation\":\"enable\",\"module\":\"ModuleAppProbe\",\"user\":\"system\",\"ip\":\"local\",\"operationId\":\"9523909a21d168e346a28978\"} on MikoPBX\\PBXCoreREST\\Lib\\ModulesManagementProcessor",
+          "2026-10-27 09:19:18 daemon.warning php.backend[39512]:  Module operation started: {\"operation\":\"disable\",\"module\":\"ModuleAppProbe\",\"user\":\"system\",\"ip\":\"local\",\"operationId\":\"dcc7d5bda9ca60fdddb248de\"} on MikoPBX\\PBXCoreREST\\Lib\\ModulesManagementProcessor",
+          "2026-10-27 09:19:20 daemon.warning php.backend[39512]:  Module operation started: {\"operation\":\"uninstall\",\"module\":\"ModuleAppProbe\",\"user\":\"system\",\"ip\":\"local\",\"operationId\":\"ab0377a506d9638833e22443\"} on MikoPBX\\PBXCoreREST\\Lib\\ModulesManagementProcessor"
+        ],
+        "system_log_tail": [
+          "2026-10-27 09:17:38 daemon.warning php.backend[1564]:  Module operation started: {\"operation\":\"install_package\",\"module\":\"mappa24b5b7d3c65\",\"user\":\"system\",\"ip\":\"local\",\"operationId\":\"6d94f4eec90491be41713464\"} on MikoPBX\\PBXCoreREST\\Lib\\ModulesManagementProcessor",
+          "2026-10-27 09:17:40 daemon.warning php.backend[1562]:  Module operation started: {\"operation\":\"enable\",\"module\":\"ModuleAppProbe\",\"user\":\"system\",\"ip\":\"local\",\"operationId\":\"9523909a21d168e346a28978\"} on MikoPBX\\PBXCoreREST\\Lib\\ModulesManagementProcessor",
+          "2026-10-27 09:17:44 daemon.err php.backend[1401]:  [WorkerSafeScriptsCore][MAIN][SHUTDOWN-ERROR] file_get_contents(/proc/25508/cmdline): Failed to open stream: No such file or directory from MikoPBX.Core.Workers.Cron (29.730s, PID:1401, Parent:1) on MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore start",
+          "2026-10-27 09:17:51 daemon.warning php.backend[40902]:  The overlay has less than 500MB of free space available. on STORAGE",
+          "2026-10-27 09:18:51 daemon.warning php.backend[65466]:  The overlay has less than 500MB of free space available. on STORAGE",
+          "2026-10-27 09:19:18 daemon.warning php.backend[39512]:  Module operation started: {\"operation\":\"disable\",\"module\":\"ModuleAppProbe\",\"user\":\"system\",\"ip\":\"local\",\"operationId\":\"dcc7d5bda9ca60fdddb248de\"} on MikoPBX\\PBXCoreREST\\Lib\\ModulesManagementProcessor",
+          "2026-10-27 09:19:20 daemon.err php.backend[39087]:  [WorkerApiCommands][MAIN][SHUTDOWN-ERROR] fsockopen(): Unable to connect to 172.22.0.1:8000 (Connection refused) from MikoPBX.PBXCoreREST.Workers (91.370s, PID:39087, Parent:1) on MikoPBX\\PBXCoreREST\\Workers\\WorkerApiCommands",
+          "2026-10-27 09:19:20 daemon.warning php.backend[39512]:  Module operation started: {\"operation\":\"uninstall\",\"module\":\"ModuleAppProbe\",\"user\":\"system\",\"ip\":\"local\",\"operationId\":\"ab0377a506d9638833e22443\"} on MikoPBX\\PBXCoreREST\\Lib\\ModulesManagementProcessor"
+        ]
+      },
+      "outcome": "passes",
+      "retries": []
+    }
+  ],
+  "outcome": "passes",
+  "seconds": 140.5
+}

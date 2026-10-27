@@ -1,0 +1,716 @@
++(eval):3> date
+Tue Oct 27 14:10:17 +08 2026
++(eval):4> <scratch>/venv003/bin/python -m pytest -q tests
++(eval):4> tail -5
+
+tests/test_validate.py:73: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_validate.py::test_bad_application_fails_with_the_expected_reason[guid-conflict-case]
+1 failed, 48 passed, 8 skipped in 2.89s
++(eval):5> docker pull -q mikopbx/mikopbx@sha256:ff5cc0238a4e170bfbf8c0be9a59b58c8affb6fb24b36d1506f5fc0cb41f7691
+docker.io/mikopbx/mikopbx@sha256:ff5cc0238a4e170bfbf8c0be9a59b58c8affb6fb24b36d1506f5fc0cb41f7691
++(eval):6> docker image inspect mikopbx/mikopbx@sha256:ff5cc0238a4e170bfbf8c0be9a59b58c8affb6fb24b36d1506f5fc0cb41f7691 --format '{{.Architecture}} {{.Os}}'
+arm64 linux
++(eval):7> RUN_DOCKER_TESTS=1 <scratch>/venv003/bin/python -m pytest -q tests/test_check.py
++(eval):7> tail -15
+...                                                                      [100%]
+3 passed in 330.01s (0:05:30)
+RUN_DOCKER_TESTS=1 $S/venv003/bin/python -m pytest -q tests/test_check.py 2>&  2.96s user 3.09s system 1% cpu 5:30.25 total
+tail -15  0.00s user 0.00s system 0% cpu 5:30.25 total
++(eval):8> rm -rf <scratch>/repos003
++(eval):8> mkdir -p <scratch>/repos003
++(eval):8> <scratch>/venv003/bin/python tests/module_repos.py <scratch>/repos003 --env
++(eval):8> eval $'export GIT_CONFIG_COUNT=\'2\'\nexport GIT_CONFIG_KEY_0=\'url.file://<scratch>/repos003/.insteadOf\'\nexport GIT_CONFIG_VALUE_0=\'https://github.com/module-applications-test/\'\nexport GIT_CONFIG_KEY_1=\'protocol.file.allow\'\nexport GIT_CONFIG_VALUE_1=\'always\''
++(eval):1> export GIT_CONFIG_COUNT=2
++(eval):2> export GIT_CONFIG_KEY_0=url.file://<scratch>/repos003/.insteadOf
++(eval):3> export GIT_CONFIG_VALUE_0=https://github.com/module-applications-test/
++(eval):4> export GIT_CONFIG_KEY_1=protocol.file.allow
++(eval):5> export GIT_CONFIG_VALUE_1=always
++(eval):9> printf 'workers: 1\napi: true\n'
++(eval):10> <scratch>/venv003/bin/python tools/check tests/fixtures/good/control/applications/ModuleAppCheck --previous-commit eb13e87500abdf6852b3001ed63b2570ea6d0f89 --expect <scratch>/r003/expect-check.yaml --output <scratch>/r003/check-control.json
+[          pass] validate: rules 0.1.0, 0 recommendation(s)
+[          pass] package: 7 files, 2735 bytes, sha256 bb87879f9890e71025dcb5500ca77b3ff20726f26368c48a2e31dc09a0270db0
+[          pass] package_previous: previous commit eb13e87500ab, sha256 57cd948bae0847307ec999da006b61c88838e4b8a4da298865a30abee216afe5
+Pulling docker.io/mikopbx/mikopbx@sha256:ff5cc0238a4e170bfbf8c0be9a59b58c8affb6fb24b36d1506f5fc0cb41f7691
+  WARNING: could not add the iptables rule: the container can reach services on this machine
+[          pass] container: docker.io/mikopbx/mikopbx@sha256:ff5cc0238a4e… (arm64), network --internal
+[          pass] boot: system:ping answered after 17s
+[          pass] update: updated in place from 1.0.0 to 1.1.0, still enabled
+[          pass] install: registered, version 1.1.0, enabled
+[          pass] php_lint: every PHP file parses (php -l on the image's PHP)
+[          pass] enable: enabled
+[          pass] services: 1 worker process(es)
+[          pass] module_api: GET /pbxcore/api/modules/<id>/check answered result=true
+[          pass] disable: disabled, no worker left
+[          pass] uninstall: unregistered, directory removed
+[          pass] logs: no fatal error or uncaught exception from the module
+[          pass] health: system:ping answers, Asterisk is up
+
+ModuleAppCheck: passes
+{
+  "module_id": "ModuleAppCheck",
+  "started_at": "2026-10-27T06:16:03+00:00",
+  "rules_version": "0.1.0",
+  "schema_version": 1,
+  "config_version": 1,
+  "architecture": "arm64",
+  "steps": [
+    {
+      "name": "validate",
+      "status": "pass",
+      "detail": "rules 0.1.0, 0 recommendation(s)",
+      "seconds": 0.1
+    },
+    {
+      "name": "package",
+      "status": "pass",
+      "detail": "7 files, 2735 bytes, sha256 bb87879f9890e71025dcb5500ca77b3ff20726f26368c48a2e31dc09a0270db0",
+      "seconds": 0.1
+    },
+    {
+      "name": "package_previous",
+      "status": "pass",
+      "detail": "previous commit eb13e87500ab, sha256 57cd948bae0847307ec999da006b61c88838e4b8a4da298865a30abee216afe5",
+      "seconds": 0.1
+    }
+  ],
+  "publisher_id": 1,
+  "repo": "https://github.com/module-applications-test/ModuleAppCheck",
+  "commit": "1a4dfa6326c83d1ebcb40838ed7c0aebc24bbcda",
+  "validation": {
+    "module_id": "ModuleAppCheck",
+    "ok": true,
+    "repo": "https://github.com/module-applications-test/ModuleAppCheck",
+    "commit": "1a4dfa6326c83d1ebcb40838ed7c0aebc24bbcda",
+    "publisher_id": 1,
+    "problems": [],
+    "warnings": [],
+    "online": {
+      "entries": 7,
+      "bytes": 3443,
+      "module_json": {
+        "moduleUniqueID": "ModuleAppCheck",
+        "version": "1.1.0",
+        "min_pbx_version": "2024.1.0",
+        "developer": "module-applications pilot",
+        "support_email": "module-applications@example.com"
+      }
+    },
+    "registry": {
+      "status": "not_checked",
+      "detail": "the licence server API (LIC-613) does not exist yet: the publisher card and module_id ownership are checked at registration",
+      "source": "stub"
+    }
+  },
+  "package": {
+    "sha256": "bb87879f9890e71025dcb5500ca77b3ff20726f26368c48a2e31dc09a0270db0",
+    "bytes": 2735,
+    "files": 7,
+    "version": "1.1.0"
+  },
+  "previous_package": {
+    "commit": "eb13e87500abdf6852b3001ed63b2570ea6d0f89",
+    "sha256": "57cd948bae0847307ec999da006b61c88838e4b8a4da298865a30abee216afe5",
+    "bytes": 2737,
+    "files": 7,
+    "version": "1.0.0"
+  },
+  "runs": [
+    {
+      "mikopbx_version": "2026.6.34",
+      "steps": [
+        {
+          "name": "container",
+          "status": "pass",
+          "detail": "docker.io/mikopbx/mikopbx@sha256:ff5cc0238a4e… (arm64), network --internal",
+          "seconds": 1.9
+        },
+        {
+          "name": "boot",
+          "status": "pass",
+          "detail": "system:ping answered after 17s",
+          "seconds": 31.7
+        },
+        {
+          "name": "update",
+          "status": "pass",
+          "detail": "updated in place from 1.0.0 to 1.1.0, still enabled",
+          "seconds": 10.0,
+          "from": "1.0.0",
+          "to": "1.1.0"
+        },
+        {
+          "name": "install",
+          "status": "pass",
+          "detail": "registered, version 1.1.0, enabled",
+          "seconds": 0.1,
+          "version": "1.1.0"
+        },
+        {
+          "name": "php_lint",
+          "status": "pass",
+          "detail": "every PHP file parses (php -l on the image's PHP)",
+          "seconds": 0.1
+        },
+        {
+          "name": "enable",
+          "status": "pass",
+          "detail": "enabled",
+          "seconds": 0.1
+        },
+        {
+          "name": "services",
+          "status": "pass",
+          "detail": "1 worker process(es)",
+          "seconds": 9.3,
+          "workers": [
+            "Modules\\ModuleAppCheck\\Lib\\WorkerAppCheckMain"
+          ]
+        },
+        {
+          "name": "module_api",
+          "status": "pass",
+          "detail": "GET /pbxcore/api/modules/<id>/check answered result=true",
+          "seconds": 0.1,
+          "response": {
+            "result": true,
+            "data": {
+              "module": "ModuleAppCheck",
+              "status": "working"
+            },
+            "messages": [],
+            "function": "",
+            "processor": "Modules\\ModuleAppCheck\\Lib\\AppCheckConf::moduleRestAPICallback",
+            "pid": 41680,
+            "meta": {
+              "timestamp": "2026-10-27T09:16:57+03:00",
+              "hash": "c90bad2d0d986a1569868d292326c8c371b17b8f"
+            }
+          }
+        },
+        {
+          "name": "disable",
+          "status": "pass",
+          "detail": "disabled, no worker left",
+          "seconds": 2.3
+        },
+        {
+          "name": "uninstall",
+          "status": "pass",
+          "detail": "unregistered, directory removed",
+          "seconds": 2.3
+        },
+        {
+          "name": "logs",
+          "status": "pass",
+          "detail": "no fatal error or uncaught exception from the module",
+          "seconds": 0.1,
+          "log_bytes": 1727
+        },
+        {
+          "name": "health",
+          "status": "pass",
+          "detail": "system:ping answers, Asterisk is up",
+          "seconds": 0.6
+        }
+      ],
+      "image": {
+        "image": "docker.io/mikopbx/mikopbx",
+        "tag": "2026.6.34",
+        "digest": "sha256:ff5cc0238a4e170bfbf8c0be9a59b58c8affb6fb24b36d1506f5fc0cb41f7691",
+        "platform_digest": "sha256:3af27a8ecc070108bdde4a2e3939407eeda0574896e55a547ee221973d0b6a6c",
+        "architecture": "arm64",
+        "mikopbx_version": "2026.6.34",
+        "isolation": {
+          "network": "docker --internal",
+          "bridge": "br-244df1bb79f7",
+          "host_firewalled": false
+        }
+      },
+      "evidence": {
+        "module_log_lines": [
+          "2026-10-27 09:16:40 daemon.warning php.backend[1566]:  Module operation started: {\"operation\":\"enable\",\"module\":\"ModuleAppCheck\",\"user\":\"system\",\"ip\":\"local\",\"operationId\":\"0638a38a538cce3cb02ef376\"} on MikoPBX\\PBXCoreREST\\Lib\\ModulesManagementProcessor",
+          "2026-10-27 09:16:57 daemon.warning php.backend[42117]:  Module operation started: {\"operation\":\"disable\",\"module\":\"ModuleAppCheck\",\"user\":\"system\",\"ip\":\"local\",\"operationId\":\"af1c3048a1de240fa4dfc413\"} on MikoPBX\\PBXCoreREST\\Lib\\ModulesManagementProcessor",
+          "2026-10-27 09:16:59 daemon.warning php.backend[41680]:  Module operation started: {\"operation\":\"uninstall\",\"module\":\"ModuleAppCheck\",\"user\":\"system\",\"ip\":\"local\",\"operationId\":\"8585280fb0caa3b7a0350be2\"} on MikoPBX\\PBXCoreREST\\Lib\\ModulesManagementProcessor"
+        ],
+        "system_log_tail": [
+          "2026-10-27 09:16:38 daemon.warning php.backend[1564]:  Module operation started: {\"operation\":\"install_package\",\"module\":\"mappe97ed4a0f637\",\"user\":\"system\",\"ip\":\"local\",\"operationId\":\"e3f5d9a4fdfa2aada2cb42e6\"} on MikoPBX\\PBXCoreREST\\Lib\\ModulesManagementProcessor",
+          "2026-10-27 09:16:40 daemon.warning php.backend[1566]:  Module operation started: {\"operation\":\"enable\",\"module\":\"ModuleAppCheck\",\"user\":\"system\",\"ip\":\"local\",\"operationId\":\"0638a38a538cce3cb02ef376\"} on MikoPBX\\PBXCoreREST\\Lib\\ModulesManagementProcessor",
+          "2026-10-27 09:16:43 daemon.warning php.backend[33430]:  Module operation started: {\"operation\":\"install_package\",\"module\":\"mapp69b7eeda5965\",\"user\":\"system\",\"ip\":\"local\",\"operationId\":\"3774439f9f55e49782a94210\"} on MikoPBX\\PBXCoreREST\\Lib\\ModulesManagementProcessor",
+          "2026-10-27 09:16:44 daemon.err php.backend[1406]:  [WorkerSafeScriptsCore][MAIN][SHUTDOWN-ERROR] file_get_contents(/proc/25486/cmdline): Failed to open stream: No such file or directory from MikoPBX.Core.Workers.Cron (26.650s, PID:1406, Parent:1) on MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore start",
+          "2026-10-27 09:16:56 daemon.warning php.backend[44657]:  The overlay has less than 500MB of free space available. on STORAGE",
+          "2026-10-27 09:16:57 daemon.warning php.backend[42117]:  Module operation started: {\"operation\":\"disable\",\"module\":\"ModuleAppCheck\",\"user\":\"system\",\"ip\":\"local\",\"operationId\":\"af1c3048a1de240fa4dfc413\"} on MikoPBX\\PBXCoreREST\\Lib\\ModulesManagementProcessor",
+          "2026-10-27 09:16:59 daemon.warning php.backend[41680]:  Module operation started: {\"operation\":\"uninstall\",\"module\":\"ModuleAppCheck\",\"user\":\"system\",\"ip\":\"local\",\"operationId\":\"8585280fb0caa3b7a0350be2\"} on MikoPBX\\PBXCoreREST\\Lib\\ModulesManagementProcessor"
+        ]
+      },
+      "outcome": "passes",
+      "retries": []
+    }
+  ],
+  "outcome": "passes",
+  "seconds": 59.3
+}
+$S/venv003/bin/python tools/check  --previous-commit  --expect  --output   0.76s user 0.74s system 2% cpu 59.400 total
++(eval):10> echo 'exit control 0'
+exit control 0
++(eval):11> printf 'api: true\nprobe_empty: true\n'
++(eval):12> <scratch>/venv003/bin/python tools/check tests/fixtures/good/probe-module/applications/ModuleAppProbe --expect <scratch>/r003/expect-probe.yaml --output <scratch>/r003/check-probe.json
+[          pass] validate: rules 0.1.0, 0 recommendation(s)
+[          pass] package: 5 files, 2940 bytes, sha256 770c23ea9b9463a4ebf0ae3433a20b25ed37670d327568ea324780abcbb42c52
+Pulling docker.io/mikopbx/mikopbx@sha256:ff5cc0238a4e170bfbf8c0be9a59b58c8affb6fb24b36d1506f5fc0cb41f7691
+  WARNING: could not add the iptables rule: the container can reach services on this machine
+[          pass] container: docker.io/mikopbx/mikopbx@sha256:ff5cc0238a4e… (arm64), network --internal
+[          pass] boot: system:ping answered after 17s
+[not_applicable] update: first version: there is no previously approved commit to update from
+[          pass] install: registered, version 1.0.0, disabled
+[          pass] php_lint: every PHP file parses (php -l on the image's PHP)
+[          pass] enable: enabled
+[          pass] services: 0 worker process(es)
+[          pass] module_api: the probe found no secret, no host file and no route out
+[          pass] disable: disabled, no worker left
+[          pass] uninstall: unregistered, directory removed
+[          pass] logs: no fatal error or uncaught exception from the module
+[          pass] health: system:ping answers, Asterisk is up
+
+ModuleAppProbe: passes
+{
+  "module_id": "ModuleAppProbe",
+  "started_at": "2026-10-27T06:17:03+00:00",
+  "rules_version": "0.1.0",
+  "schema_version": 1,
+  "config_version": 1,
+  "architecture": "arm64",
+  "steps": [
+    {
+      "name": "validate",
+      "status": "pass",
+      "detail": "rules 0.1.0, 0 recommendation(s)",
+      "seconds": 0.1
+    },
+    {
+      "name": "package",
+      "status": "pass",
+      "detail": "5 files, 2940 bytes, sha256 770c23ea9b9463a4ebf0ae3433a20b25ed37670d327568ea324780abcbb42c52",
+      "seconds": 0.1
+    }
+  ],
+  "publisher_id": 1,
+  "repo": "https://github.com/module-applications-test/ModuleAppProbe",
+  "commit": "471c34cdf88c10d695286d83a62cc1aeb4f074a6",
+  "validation": {
+    "module_id": "ModuleAppProbe",
+    "ok": true,
+    "repo": "https://github.com/module-applications-test/ModuleAppProbe",
+    "commit": "471c34cdf88c10d695286d83a62cc1aeb4f074a6",
+    "publisher_id": 1,
+    "problems": [],
+    "warnings": [],
+    "online": {
+      "entries": 5,
+      "bytes": 5622,
+      "module_json": {
+        "moduleUniqueID": "ModuleAppProbe",
+        "version": "1.0.0",
+        "min_pbx_version": "2024.1.0",
+        "developer": "module-applications pilot",
+        "support_email": "module-applications@example.com"
+      }
+    },
+    "registry": {
+      "status": "not_checked",
+      "detail": "the licence server API (LIC-613) does not exist yet: the publisher card and module_id ownership are checked at registration",
+      "source": "stub"
+    }
+  },
+  "package": {
+    "sha256": "770c23ea9b9463a4ebf0ae3433a20b25ed37670d327568ea324780abcbb42c52",
+    "bytes": 2940,
+    "files": 5,
+    "version": "1.0.0"
+  },
+  "runs": [
+    {
+      "mikopbx_version": "2026.6.34",
+      "steps": [
+        {
+          "name": "container",
+          "status": "pass",
+          "detail": "docker.io/mikopbx/mikopbx@sha256:ff5cc0238a4e… (arm64), network --internal",
+          "seconds": 1.9
+        },
+        {
+          "name": "boot",
+          "status": "pass",
+          "detail": "system:ping answered after 17s",
+          "seconds": 32.5
+        },
+        {
+          "name": "update",
+          "status": "not_applicable",
+          "detail": "first version: there is no previously approved commit to update from",
+          "seconds": 0.0
+        },
+        {
+          "name": "install",
+          "status": "pass",
+          "detail": "registered, version 1.0.0, disabled",
+          "seconds": 2.6,
+          "version": "1.0.0"
+        },
+        {
+          "name": "php_lint",
+          "status": "pass",
+          "detail": "every PHP file parses (php -l on the image's PHP)",
+          "seconds": 0.1
+        },
+        {
+          "name": "enable",
+          "status": "pass",
+          "detail": "enabled",
+          "seconds": 2.3
+        },
+        {
+          "name": "services",
+          "status": "pass",
+          "detail": "0 worker process(es)",
+          "seconds": 92.4,
+          "workers": []
+        },
+        {
+          "name": "module_api",
+          "status": "pass",
+          "detail": "the probe found no secret, no host file and no route out",
+          "seconds": 3.1,
+          "response": {
+            "result": true,
+            "data": {
+              "module": "ModuleAppProbe",
+              "secret_like_env": [],
+              "env_names": [
+                "HOME",
+                "HOSTNAME",
+                "LD_PRELOAD",
+                "MALLOC_CONF",
+                "MIKOPBX_VERSION",
+                "PATH",
+                "PWD",
+                "SHLVL",
+                "TZ",
+                "fpm.conf)",
+                "ocess /usr/sbin/nginx"
+              ],
+              "files": [],
+              "mounts": [],
+              "network": {
+                "metadata 169.254.169.254:80": false,
+                "docker host 172.17.0.1:80": false,
+                "docker host 172.17.0.1:2375": false,
+                "internet 1.1.1.1:443": false,
+                "internet 140.82.112.3:443 (github.com)": false,
+                "private 10.0.0.1:80": false,
+                "private 192.168.0.1:80": false,
+                "host bridge 172.22.0.1:22": false,
+                "host bridge 172.22.0.1:80": false,
+                "host bridge 172.22.0.1:2375": false,
+                "host bridge 172.22.0.1:8000": false
+              },
+              "dns_github": null
+            },
+            "messages": [],
+            "function": "",
+            "processor": "Modules\\ModuleAppProbe\\Lib\\AppProbeConf::moduleRestAPICallback",
+            "pid": 39087,
+            "meta": {
+              "timestamp": "2026-10-27T09:19:18+03:00",
+              "hash": "5d0b1860b62211ab5ed70d1540021a202a26da6c"
+            }
+          }
+        },
+        {
+          "name": "disable",
+          "status": "pass",
+          "detail": "disabled, no worker left",
+          "seconds": 2.3
+        },
+        {
+          "name": "uninstall",
+          "status": "pass",
+          "detail": "unregistered, directory removed",
+          "seconds": 2.3
+        },
+        {
+          "name": "logs",
+          "status": "pass",
+          "detail": "no fatal error or uncaught exception from the module",
+          "seconds": 0.1,
+          "log_bytes": 1863
+        },
+        {
+          "name": "health",
+          "status": "pass",
+          "detail": "system:ping answers, Asterisk is up",
+          "seconds": 0.1
+        }
+      ],
+      "image": {
+        "image": "docker.io/mikopbx/mikopbx",
+        "tag": "2026.6.34",
+        "digest": "sha256:ff5cc0238a4e170bfbf8c0be9a59b58c8affb6fb24b36d1506f5fc0cb41f7691",
+        "platform_digest": "sha256:3af27a8ecc070108bdde4a2e3939407eeda0574896e55a547ee221973d0b6a6c",
+        "architecture": "arm64",
+        "mikopbx_version": "2026.6.34",
+        "isolation": {
+          "network": "docker --internal",
+          "bridge": "br-154aaac0d0a8",
+          "host_firewalled": false
+        }
+      },
+      "evidence": {
+        "module_log_lines": [
+          "2026-10-27 09:17:40 daemon.warning php.backend[1562]:  Module operation started: {\"operation\":\"enable\",\"module\":\"ModuleAppProbe\",\"user\":\"system\",\"ip\":\"local\",\"operationId\":\"9523909a21d168e346a28978\"} on MikoPBX\\PBXCoreREST\\Lib\\ModulesManagementProcessor",
+          "2026-10-27 09:19:18 daemon.warning php.backend[39512]:  Module operation started: {\"operation\":\"disable\",\"module\":\"ModuleAppProbe\",\"user\":\"system\",\"ip\":\"local\",\"operationId\":\"dcc7d5bda9ca60fdddb248de\"} on MikoPBX\\PBXCoreREST\\Lib\\ModulesManagementProcessor",
+          "2026-10-27 09:19:20 daemon.warning php.backend[39512]:  Module operation started: {\"operation\":\"uninstall\",\"module\":\"ModuleAppProbe\",\"user\":\"system\",\"ip\":\"local\",\"operationId\":\"ab0377a506d9638833e22443\"} on MikoPBX\\PBXCoreREST\\Lib\\ModulesManagementProcessor"
+        ],
+        "system_log_tail": [
+          "2026-10-27 09:17:38 daemon.warning php.backend[1564]:  Module operation started: {\"operation\":\"install_package\",\"module\":\"mappa24b5b7d3c65\",\"user\":\"system\",\"ip\":\"local\",\"operationId\":\"6d94f4eec90491be41713464\"} on MikoPBX\\PBXCoreREST\\Lib\\ModulesManagementProcessor",
+          "2026-10-27 09:17:40 daemon.warning php.backend[1562]:  Module operation started: {\"operation\":\"enable\",\"module\":\"ModuleAppProbe\",\"user\":\"system\",\"ip\":\"local\",\"operationId\":\"9523909a21d168e346a28978\"} on MikoPBX\\PBXCoreREST\\Lib\\ModulesManagementProcessor",
+          "2026-10-27 09:17:44 daemon.err php.backend[1401]:  [WorkerSafeScriptsCore][MAIN][SHUTDOWN-ERROR] file_get_contents(/proc/25508/cmdline): Failed to open stream: No such file or directory from MikoPBX.Core.Workers.Cron (29.730s, PID:1401, Parent:1) on MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore start",
+          "2026-10-27 09:17:51 daemon.warning php.backend[40902]:  The overlay has less than 500MB of free space available. on STORAGE",
+          "2026-10-27 09:18:51 daemon.warning php.backend[65466]:  The overlay has less than 500MB of free space available. on STORAGE",
+          "2026-10-27 09:19:18 daemon.warning php.backend[39512]:  Module operation started: {\"operation\":\"disable\",\"module\":\"ModuleAppProbe\",\"user\":\"system\",\"ip\":\"local\",\"operationId\":\"dcc7d5bda9ca60fdddb248de\"} on MikoPBX\\PBXCoreREST\\Lib\\ModulesManagementProcessor",
+          "2026-10-27 09:19:20 daemon.err php.backend[39087]:  [WorkerApiCommands][MAIN][SHUTDOWN-ERROR] fsockopen(): Unable to connect to 172.22.0.1:8000 (Connection refused) from MikoPBX.PBXCoreREST.Workers (91.370s, PID:39087, Parent:1) on MikoPBX\\PBXCoreREST\\Workers\\WorkerApiCommands",
+          "2026-10-27 09:19:20 daemon.warning php.backend[39512]:  Module operation started: {\"operation\":\"uninstall\",\"module\":\"ModuleAppProbe\",\"user\":\"system\",\"ip\":\"local\",\"operationId\":\"ab0377a506d9638833e22443\"} on MikoPBX\\PBXCoreREST\\Lib\\ModulesManagementProcessor"
+        ]
+      },
+      "outcome": "passes",
+      "retries": []
+    }
+  ],
+  "outcome": "passes",
+  "seconds": 140.5
+}
+$S/venv003/bin/python tools/check  --expect $S/r003/expect-probe.yaml --outpu  1.01s user 1.00s system 1% cpu 2:20.66 total
++(eval):12> echo 'exit probe 0'
+exit probe 0
++(eval):13> <scratch>/venv003/bin/python tools/check tests/fixtures/good/broken-module/applications/ModuleAppBroken --output <scratch>/r003/check-broken.json
+[          pass] validate: rules 0.1.0, 0 recommendation(s)
+[          pass] package: 5 files, 1478 bytes, sha256 a5e0257737f4c3c44245967a910d685ad7118ca1fde83807e34935abfe342267
+Pulling docker.io/mikopbx/mikopbx@sha256:ff5cc0238a4e170bfbf8c0be9a59b58c8affb6fb24b36d1506f5fc0cb41f7691
+  WARNING: could not add the iptables rule: the container can reach services on this machine
+[          pass] container: docker.io/mikopbx/mikopbx@sha256:ff5cc0238a4e… (arm64), network --internal
+[          pass] boot: system:ping answered after 12s
+[not_applicable] update: first version: there is no previously approved commit to update from
+[          pass] install: registered, version 1.0.0, disabled
+[          pass] php_lint: every PHP file parses (php -l on the image's PHP)
+[          pass] enable: enabled
+[          pass] services: 0 worker process(es)
+[          pass] module_api: GET /pbxcore/api/modules/<id>/check answered result=true
+[          fail] disable: disable ended failed: {"error": ["Call to undefined function Modules\\ModuleAppBroken\\Lib\\module_app_broken_function_that_does_not_exist()"]}
+
+ModuleAppBroken: fails
+{
+  "module_id": "ModuleAppBroken",
+  "started_at": "2026-10-27T06:19:23+00:00",
+  "rules_version": "0.1.0",
+  "schema_version": 1,
+  "config_version": 1,
+  "architecture": "arm64",
+  "steps": [
+    {
+      "name": "validate",
+      "status": "pass",
+      "detail": "rules 0.1.0, 0 recommendation(s)",
+      "seconds": 0.1
+    },
+    {
+      "name": "package",
+      "status": "pass",
+      "detail": "5 files, 1478 bytes, sha256 a5e0257737f4c3c44245967a910d685ad7118ca1fde83807e34935abfe342267",
+      "seconds": 0.1
+    }
+  ],
+  "publisher_id": 1,
+  "repo": "https://github.com/module-applications-test/ModuleAppBroken",
+  "commit": "ab4075616a69e18b59dbd205facfb98280ee62dc",
+  "validation": {
+    "module_id": "ModuleAppBroken",
+    "ok": true,
+    "repo": "https://github.com/module-applications-test/ModuleAppBroken",
+    "commit": "ab4075616a69e18b59dbd205facfb98280ee62dc",
+    "publisher_id": 1,
+    "problems": [],
+    "warnings": [],
+    "online": {
+      "entries": 5,
+      "bytes": 1360,
+      "module_json": {
+        "moduleUniqueID": "ModuleAppBroken",
+        "version": "1.0.0",
+        "min_pbx_version": "2024.1.0",
+        "developer": "module-applications pilot",
+        "support_email": "module-applications@example.com"
+      }
+    },
+    "registry": {
+      "status": "not_checked",
+      "detail": "the licence server API (LIC-613) does not exist yet: the publisher card and module_id ownership are checked at registration",
+      "source": "stub"
+    }
+  },
+  "package": {
+    "sha256": "a5e0257737f4c3c44245967a910d685ad7118ca1fde83807e34935abfe342267",
+    "bytes": 1478,
+    "files": 5,
+    "version": "1.0.0"
+  },
+  "runs": [
+    {
+      "mikopbx_version": "2026.6.34",
+      "steps": [
+        {
+          "name": "container",
+          "status": "pass",
+          "detail": "docker.io/mikopbx/mikopbx@sha256:ff5cc0238a4e… (arm64), network --internal",
+          "seconds": 1.8
+        },
+        {
+          "name": "boot",
+          "status": "pass",
+          "detail": "system:ping answered after 12s",
+          "seconds": 27.4
+        },
+        {
+          "name": "update",
+          "status": "not_applicable",
+          "detail": "first version: there is no previously approved commit to update from",
+          "seconds": 0.0
+        },
+        {
+          "name": "install",
+          "status": "pass",
+          "detail": "registered, version 1.0.0, disabled",
+          "seconds": 2.7,
+          "version": "1.0.0"
+        },
+        {
+          "name": "php_lint",
+          "status": "pass",
+          "detail": "every PHP file parses (php -l on the image's PHP)",
+          "seconds": 0.1
+        },
+        {
+          "name": "enable",
+          "status": "pass",
+          "detail": "enabled",
+          "seconds": 2.3
+        },
+        {
+          "name": "services",
+          "status": "pass",
+          "detail": "0 worker process(es)",
+          "seconds": 92.3,
+          "workers": []
+        },
+        {
+          "name": "module_api",
+          "status": "pass",
+          "detail": "GET /pbxcore/api/modules/<id>/check answered result=true",
+          "seconds": 0.1,
+          "response": {
+            "result": true,
+            "data": [],
+            "messages": [],
+            "function": "",
+            "processor": "MikoPBX\\Modules\\Config\\ConfigClass::moduleRestAPICallback",
+            "pid": 34668,
+            "meta": {
+              "timestamp": "2026-10-27T09:21:30+03:00",
+              "hash": "2680454c7d2fd47e4201737299d88e03343ac0fd"
+            }
+          }
+        },
+        {
+          "name": "disable",
+          "status": "fail",
+          "detail": "disable ended failed: {\"error\": [\"Call to undefined function Modules\\\\ModuleAppBroken\\\\Lib\\\\module_app_broken_function_that_does_not_exist()\"]}",
+          "seconds": 2.2
+        }
+      ],
+      "image": {
+        "image": "docker.io/mikopbx/mikopbx",
+        "tag": "2026.6.34",
+        "digest": "sha256:ff5cc0238a4e170bfbf8c0be9a59b58c8affb6fb24b36d1506f5fc0cb41f7691",
+        "platform_digest": "sha256:3af27a8ecc070108bdde4a2e3939407eeda0574896e55a547ee221973d0b6a6c",
+        "architecture": "arm64",
+        "mikopbx_version": "2026.6.34",
+        "isolation": {
+          "network": "docker --internal",
+          "bridge": "br-0644454dfad9",
+          "host_firewalled": false
+        }
+      },
+      "evidence": {
+        "module_log_lines": [
+          "2026-10-27 09:19:56 daemon.warning php.backend[1564]:  Module operation started: {\"operation\":\"enable\",\"module\":\"ModuleAppBroken\",\"user\":\"system\",\"ip\":\"local\",\"operationId\":\"0a56ed7f58895542c89e085f\"} on MikoPBX\\PBXCoreREST\\Lib\\ModulesManagementProcessor",
+          "2026-10-27 09:20:00 daemon.err php.backend[33519]:  Error: Call to undefined function Modules\\ModuleAppBroken\\Lib\\module_app_broken_function_that_does_not_exist() in file /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php on line 16\\x0AStack trace:\\x0A  1. Error->() /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php:16\\x0A  2. Modules\\ModuleAppBroken\\Lib\\AppBrokenConf->getModuleWorkers() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  3. call_user_func_array() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  4. MikoPBX\\Common\\Providers\\PBXConfModulesProvider->hookModulesMethod() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:633\\x0A  5. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->prepareWorkersList() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:723\\x0A  6. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->start(",
+          "2026-10-27 09:20:06 daemon.err php.backend[36713]:  Error: Call to undefined function Modules\\ModuleAppBroken\\Lib\\module_app_broken_function_that_does_not_exist() in file /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php on line 16\\x0AStack trace:\\x0A  1. Error->() /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php:16\\x0A  2. Modules\\ModuleAppBroken\\Lib\\AppBrokenConf->getModuleWorkers() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  3. call_user_func_array() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  4. MikoPBX\\Common\\Providers\\PBXConfModulesProvider->hookModulesMethod() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:633\\x0A  5. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->prepareWorkersList() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:723\\x0A  6. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->start(",
+          "2026-10-27 09:20:11 daemon.err php.backend[36713]:  Error: Call to undefined function Modules\\ModuleAppBroken\\Lib\\module_app_broken_function_that_does_not_exist() in file /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php on line 16\\x0AStack trace:\\x0A  1. Error->() /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php:16\\x0A  2. Modules\\ModuleAppBroken\\Lib\\AppBrokenConf->getModuleWorkers() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  3. call_user_func_array() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  4. MikoPBX\\Common\\Providers\\PBXConfModulesProvider->hookModulesMethod() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:633\\x0A  5. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->prepareWorkersList() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:723\\x0A  6. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->start(",
+          "2026-10-27 09:20:16 daemon.err php.backend[36713]:  Error: Call to undefined function Modules\\ModuleAppBroken\\Lib\\module_app_broken_function_that_does_not_exist() in file /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php on line 16\\x0AStack trace:\\x0A  1. Error->() /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php:16\\x0A  2. Modules\\ModuleAppBroken\\Lib\\AppBrokenConf->getModuleWorkers() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  3. call_user_func_array() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  4. MikoPBX\\Common\\Providers\\PBXConfModulesProvider->hookModulesMethod() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:633\\x0A  5. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->prepareWorkersList() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:723\\x0A  6. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->start(",
+          "2026-10-27 09:20:21 daemon.err php.backend[36713]:  Error: Call to undefined function Modules\\ModuleAppBroken\\Lib\\module_app_broken_function_that_does_not_exist() in file /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php on line 16\\x0AStack trace:\\x0A  1. Error->() /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php:16\\x0A  2. Modules\\ModuleAppBroken\\Lib\\AppBrokenConf->getModuleWorkers() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  3. call_user_func_array() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  4. MikoPBX\\Common\\Providers\\PBXConfModulesProvider->hookModulesMethod() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:633\\x0A  5. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->prepareWorkersList() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:723\\x0A  6. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->start(",
+          "2026-10-27 09:20:26 daemon.err php.backend[36713]:  Error: Call to undefined function Modules\\ModuleAppBroken\\Lib\\module_app_broken_function_that_does_not_exist() in file /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php on line 16\\x0AStack trace:\\x0A  1. Error->() /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php:16\\x0A  2. Modules\\ModuleAppBroken\\Lib\\AppBrokenConf->getModuleWorkers() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  3. call_user_func_array() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  4. MikoPBX\\Common\\Providers\\PBXConfModulesProvider->hookModulesMethod() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:633\\x0A  5. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->prepareWorkersList() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:723\\x0A  6. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->start(",
+          "2026-10-27 09:20:31 daemon.err php.backend[36713]:  Error: Call to undefined function Modules\\ModuleAppBroken\\Lib\\module_app_broken_function_that_does_not_exist() in file /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php on line 16\\x0AStack trace:\\x0A  1. Error->() /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php:16\\x0A  2. Modules\\ModuleAppBroken\\Lib\\AppBrokenConf->getModuleWorkers() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  3. call_user_func_array() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  4. MikoPBX\\Common\\Providers\\PBXConfModulesProvider->hookModulesMethod() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:633\\x0A  5. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->prepareWorkersList() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:723\\x0A  6. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->start(",
+          "2026-10-27 09:20:36 daemon.err php.backend[36713]:  Error: Call to undefined function Modules\\ModuleAppBroken\\Lib\\module_app_broken_function_that_does_not_exist() in file /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php on line 16\\x0AStack trace:\\x0A  1. Error->() /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php:16\\x0A  2. Modules\\ModuleAppBroken\\Lib\\AppBrokenConf->getModuleWorkers() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  3. call_user_func_array() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  4. MikoPBX\\Common\\Providers\\PBXConfModulesProvider->hookModulesMethod() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:633\\x0A  5. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->prepareWorkersList() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:723\\x0A  6. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->start(",
+          "2026-10-27 09:20:41 daemon.err php.backend[36713]:  Error: Call to undefined function Modules\\ModuleAppBroken\\Lib\\module_app_broken_function_that_does_not_exist() in file /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php on line 16\\x0AStack trace:\\x0A  1. Error->() /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php:16\\x0A  2. Modules\\ModuleAppBroken\\Lib\\AppBrokenConf->getModuleWorkers() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  3. call_user_func_array() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  4. MikoPBX\\Common\\Providers\\PBXConfModulesProvider->hookModulesMethod() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:633\\x0A  5. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->prepareWorkersList() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:723\\x0A  6. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->start(",
+          "2026-10-27 09:20:46 daemon.err php.backend[36713]:  Error: Call to undefined function Modules\\ModuleAppBroken\\Lib\\module_app_broken_function_that_does_not_exist() in file /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php on line 16\\x0AStack trace:\\x0A  1. Error->() /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php:16\\x0A  2. Modules\\ModuleAppBroken\\Lib\\AppBrokenConf->getModuleWorkers() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  3. call_user_func_array() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  4. MikoPBX\\Common\\Providers\\PBXConfModulesProvider->hookModulesMethod() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:633\\x0A  5. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->prepareWorkersList() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:723\\x0A  6. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->start(",
+          "2026-10-27 09:20:51 daemon.err php.backend[36713]:  Error: Call to undefined function Modules\\ModuleAppBroken\\Lib\\module_app_broken_function_that_does_not_exist() in file /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php on line 16\\x0AStack trace:\\x0A  1. Error->() /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php:16\\x0A  2. Modules\\ModuleAppBroken\\Lib\\AppBrokenConf->getModuleWorkers() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  3. call_user_func_array() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  4. MikoPBX\\Common\\Providers\\PBXConfModulesProvider->hookModulesMethod() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:633\\x0A  5. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->prepareWorkersList() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:723\\x0A  6. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->start(",
+          "2026-10-27 09:20:56 daemon.err php.backend[36713]:  Error: Call to undefined function Modules\\ModuleAppBroken\\Lib\\module_app_broken_function_that_does_not_exist() in file /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php on line 16\\x0AStack trace:\\x0A  1. Error->() /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php:16\\x0A  2. Modules\\ModuleAppBroken\\Lib\\AppBrokenConf->getModuleWorkers() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  3. call_user_func_array() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  4. MikoPBX\\Common\\Providers\\PBXConfModulesProvider->hookModulesMethod() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:633\\x0A  5. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->prepareWorkersList() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:723\\x0A  6. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->start(",
+          "2026-10-27 09:21:01 daemon.err php.backend[36713]:  Error: Call to undefined function Modules\\ModuleAppBroken\\Lib\\module_app_broken_function_that_does_not_exist() in file /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php on line 16\\x0AStack trace:\\x0A  1. Error->() /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php:16\\x0A  2. Modules\\ModuleAppBroken\\Lib\\AppBrokenConf->getModuleWorkers() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  3. call_user_func_array() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  4. MikoPBX\\Common\\Providers\\PBXConfModulesProvider->hookModulesMethod() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:633\\x0A  5. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->prepareWorkersList() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:723\\x0A  6. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->start(",
+          "2026-10-27 09:21:06 daemon.err php.backend[36713]:  Error: Call to undefined function Modules\\ModuleAppBroken\\Lib\\module_app_broken_function_that_does_not_exist() in file /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php on line 16\\x0AStack trace:\\x0A  1. Error->() /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php:16\\x0A  2. Modules\\ModuleAppBroken\\Lib\\AppBrokenConf->getModuleWorkers() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  3. call_user_func_array() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  4. MikoPBX\\Common\\Providers\\PBXConfModulesProvider->hookModulesMethod() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:633\\x0A  5. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->prepareWorkersList() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:723\\x0A  6. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->start(",
+          "2026-10-27 09:21:12 daemon.err php.backend[36713]:  Error: Call to undefined function Modules\\ModuleAppBroken\\Lib\\module_app_broken_function_that_does_not_exist() in file /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php on line 16\\x0AStack trace:\\x0A  1. Error->() /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php:16\\x0A  2. Modules\\ModuleAppBroken\\Lib\\AppBrokenConf->getModuleWorkers() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  3. call_user_func_array() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  4. MikoPBX\\Common\\Providers\\PBXConfModulesProvider->hookModulesMethod() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:633\\x0A  5. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->prepareWorkersList() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:723\\x0A  6. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->start(",
+          "2026-10-27 09:21:17 daemon.err php.backend[36713]:  Error: Call to undefined function Modules\\ModuleAppBroken\\Lib\\module_app_broken_function_that_does_not_exist() in file /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php on line 16\\x0AStack trace:\\x0A  1. Error->() /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php:16\\x0A  2. Modules\\ModuleAppBroken\\Lib\\AppBrokenConf->getModuleWorkers() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  3. call_user_func_array() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  4. MikoPBX\\Common\\Providers\\PBXConfModulesProvider->hookModulesMethod() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:633\\x0A  5. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->prepareWorkersList() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:723\\x0A  6. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->start(",
+          "2026-10-27 09:21:22 daemon.err php.backend[36713]:  Error: Call to undefined function Modules\\ModuleAppBroken\\Lib\\module_app_broken_function_that_does_not_exist() in file /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php on line 16\\x0AStack trace:\\x0A  1. Error->() /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php:16\\x0A  2. Modules\\ModuleAppBroken\\Lib\\AppBrokenConf->getModuleWorkers() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  3. call_user_func_array() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  4. MikoPBX\\Common\\Providers\\PBXConfModulesProvider->hookModulesMethod() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:633\\x0A  5. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->prepareWorkersList() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:723\\x0A  6. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->start(",
+          "2026-10-27 09:21:27 daemon.err php.backend[36713]:  Error: Call to undefined function Modules\\ModuleAppBroken\\Lib\\module_app_broken_function_that_does_not_exist() in file /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php on line 16\\x0AStack trace:\\x0A  1. Error->() /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php:16\\x0A  2. Modules\\ModuleAppBroken\\Lib\\AppBrokenConf->getModuleWorkers() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  3. call_user_func_array() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  4. MikoPBX\\Common\\Providers\\PBXConfModulesProvider->hookModulesMethod() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:633\\x0A  5. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->prepareWorkersList() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:723\\x0A  6. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->start(",
+          "2026-10-27 09:21:30 daemon.warning php.backend[34160]:  Module operation started: {\"operation\":\"disable\",\"module\":\"ModuleAppBroken\",\"user\":\"system\",\"ip\":\"local\",\"operationId\":\"8acaba1dc7a78592c7dcc5b3\"} on MikoPBX\\PBXCoreREST\\Lib\\ModulesManagementProcessor",
+          "2026-10-27 09:21:32 daemon.err php.backend[36713]:  Error: Call to undefined function Modules\\ModuleAppBroken\\Lib\\module_app_broken_function_that_does_not_exist() in file /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php on line 16\\x0AStack trace:\\x0A  1. Error->() /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php:16\\x0A  2. Modules\\ModuleAppBroken\\Lib\\AppBrokenConf->getModuleWorkers() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  3. call_user_func_array() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  4. MikoPBX\\Common\\Providers\\PBXConfModulesProvider->hookModulesMethod() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:633\\x0A  5. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->prepareWorkersList() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:723\\x0A  6. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->start("
+        ],
+        "system_log_tail": [
+          "2026-10-27 09:19:53 daemon.warning php.backend[1560]:  Module operation started: {\"operation\":\"install_package\",\"module\":\"mapp343f846bc022\",\"user\":\"system\",\"ip\":\"local\",\"operationId\":\"9513fc5fb15ba6b1405f373c\"} on MikoPBX\\PBXCoreREST\\Lib\\ModulesManagementProcessor",
+          "2026-10-27 09:19:56 daemon.warning php.backend[1564]:  Module operation started: {\"operation\":\"enable\",\"module\":\"ModuleAppBroken\",\"user\":\"system\",\"ip\":\"local\",\"operationId\":\"0a56ed7f58895542c89e085f\"} on MikoPBX\\PBXCoreREST\\Lib\\ModulesManagementProcessor",
+          "2026-10-27 09:19:59 daemon.err php.backend[1401]:  [WorkerSafeScriptsCore][MAIN][SHUTDOWN-ERROR] disk_free_space(): No such file or directory from MikoPBX.Core.Workers.Cron (26.530s, PID:1401, Parent:1) on MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore start",
+          "2026-10-27 09:20:00 daemon.err php.backend[33519]:  Error: Call to undefined function Modules\\ModuleAppBroken\\Lib\\module_app_broken_function_that_does_not_exist() in file /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php on line 16\\x0AStack trace:\\x0A  1. Error->() /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php:16\\x0A  2. Modules\\ModuleAppBroken\\Lib\\AppBrokenConf->getModuleWorkers() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  3. call_user_func_array() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  4. MikoPBX\\Common\\Providers\\PBXConfModulesProvider->hookModulesMethod() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:633\\x0A  5. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->prepareWorkersList() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:723\\x0A  6. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->start(",
+          "2026-10-27 09:20:00 daemon.warning php.backend[33741]:  The overlay has less than 500MB of free space available. on STORAGE",
+          "2026-10-27 09:20:06 daemon.err php.backend[36713]:  Error: Call to undefined function Modules\\ModuleAppBroken\\Lib\\module_app_broken_function_that_does_not_exist() in file /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php on line 16\\x0AStack trace:\\x0A  1. Error->() /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php:16\\x0A  2. Modules\\ModuleAppBroken\\Lib\\AppBrokenConf->getModuleWorkers() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  3. call_user_func_array() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  4. MikoPBX\\Common\\Providers\\PBXConfModulesProvider->hookModulesMethod() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:633\\x0A  5. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->prepareWorkersList() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:723\\x0A  6. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->start(",
+          "2026-10-27 09:20:06 daemon.warning php.backend[37072]:  The overlay has less than 500MB of free space available. on STORAGE",
+          "2026-10-27 09:20:11 daemon.err php.backend[36713]:  Error: Call to undefined function Modules\\ModuleAppBroken\\Lib\\module_app_broken_function_that_does_not_exist() in file /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php on line 16\\x0AStack trace:\\x0A  1. Error->() /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php:16\\x0A  2. Modules\\ModuleAppBroken\\Lib\\AppBrokenConf->getModuleWorkers() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  3. call_user_func_array() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  4. MikoPBX\\Common\\Providers\\PBXConfModulesProvider->hookModulesMethod() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:633\\x0A  5. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->prepareWorkersList() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:723\\x0A  6. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->start(",
+          "2026-10-27 09:20:16 daemon.err php.backend[36713]:  Error: Call to undefined function Modules\\ModuleAppBroken\\Lib\\module_app_broken_function_that_does_not_exist() in file /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php on line 16\\x0AStack trace:\\x0A  1. Error->() /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php:16\\x0A  2. Modules\\ModuleAppBroken\\Lib\\AppBrokenConf->getModuleWorkers() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  3. call_user_func_array() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  4. MikoPBX\\Common\\Providers\\PBXConfModulesProvider->hookModulesMethod() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:633\\x0A  5. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->prepareWorkersList() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:723\\x0A  6. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->start(",
+          "2026-10-27 09:20:21 daemon.err php.backend[36713]:  Error: Call to undefined function Modules\\ModuleAppBroken\\Lib\\module_app_broken_function_that_does_not_exist() in file /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php on line 16\\x0AStack trace:\\x0A  1. Error->() /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php:16\\x0A  2. Modules\\ModuleAppBroken\\Lib\\AppBrokenConf->getModuleWorkers() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  3. call_user_func_array() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  4. MikoPBX\\Common\\Providers\\PBXConfModulesProvider->hookModulesMethod() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:633\\x0A  5. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->prepareWorkersList() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:723\\x0A  6. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->start(",
+          "2026-10-27 09:20:26 daemon.err php.backend[36713]:  Error: Call to undefined function Modules\\ModuleAppBroken\\Lib\\module_app_broken_function_that_does_not_exist() in file /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php on line 16\\x0AStack trace:\\x0A  1. Error->() /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php:16\\x0A  2. Modules\\ModuleAppBroken\\Lib\\AppBrokenConf->getModuleWorkers() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  3. call_user_func_array() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  4. MikoPBX\\Common\\Providers\\PBXConfModulesProvider->hookModulesMethod() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:633\\x0A  5. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->prepareWorkersList() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:723\\x0A  6. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->start(",
+          "2026-10-27 09:20:31 daemon.err php.backend[36713]:  Error: Call to undefined function Modules\\ModuleAppBroken\\Lib\\module_app_broken_function_that_does_not_exist() in file /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php on line 16\\x0AStack trace:\\x0A  1. Error->() /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php:16\\x0A  2. Modules\\ModuleAppBroken\\Lib\\AppBrokenConf->getModuleWorkers() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  3. call_user_func_array() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  4. MikoPBX\\Common\\Providers\\PBXConfModulesProvider->hookModulesMethod() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:633\\x0A  5. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->prepareWorkersList() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:723\\x0A  6. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->start(",
+          "2026-10-27 09:20:36 daemon.err php.backend[36713]:  Error: Call to undefined function Modules\\ModuleAppBroken\\Lib\\module_app_broken_function_that_does_not_exist() in file /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php on line 16\\x0AStack trace:\\x0A  1. Error->() /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php:16\\x0A  2. Modules\\ModuleAppBroken\\Lib\\AppBrokenConf->getModuleWorkers() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  3. call_user_func_array() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  4. MikoPBX\\Common\\Providers\\PBXConfModulesProvider->hookModulesMethod() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:633\\x0A  5. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->prepareWorkersList() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:723\\x0A  6. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->start(",
+          "2026-10-27 09:20:41 daemon.err php.backend[36713]:  Error: Call to undefined function Modules\\ModuleAppBroken\\Lib\\module_app_broken_function_that_does_not_exist() in file /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php on line 16\\x0AStack trace:\\x0A  1. Error->() /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php:16\\x0A  2. Modules\\ModuleAppBroken\\Lib\\AppBrokenConf->getModuleWorkers() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  3. call_user_func_array() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  4. MikoPBX\\Common\\Providers\\PBXConfModulesProvider->hookModulesMethod() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:633\\x0A  5. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->prepareWorkersList() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:723\\x0A  6. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->start(",
+          "2026-10-27 09:20:46 daemon.err php.backend[36713]:  Error: Call to undefined function Modules\\ModuleAppBroken\\Lib\\module_app_broken_function_that_does_not_exist() in file /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php on line 16\\x0AStack trace:\\x0A  1. Error->() /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php:16\\x0A  2. Modules\\ModuleAppBroken\\Lib\\AppBrokenConf->getModuleWorkers() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  3. call_user_func_array() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  4. MikoPBX\\Common\\Providers\\PBXConfModulesProvider->hookModulesMethod() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:633\\x0A  5. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->prepareWorkersList() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:723\\x0A  6. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->start(",
+          "2026-10-27 09:20:51 daemon.err php.backend[36713]:  Error: Call to undefined function Modules\\ModuleAppBroken\\Lib\\module_app_broken_function_that_does_not_exist() in file /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php on line 16\\x0AStack trace:\\x0A  1. Error->() /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php:16\\x0A  2. Modules\\ModuleAppBroken\\Lib\\AppBrokenConf->getModuleWorkers() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  3. call_user_func_array() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  4. MikoPBX\\Common\\Providers\\PBXConfModulesProvider->hookModulesMethod() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:633\\x0A  5. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->prepareWorkersList() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:723\\x0A  6. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->start(",
+          "2026-10-27 09:20:56 daemon.err php.backend[36713]:  Error: Call to undefined function Modules\\ModuleAppBroken\\Lib\\module_app_broken_function_that_does_not_exist() in file /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php on line 16\\x0AStack trace:\\x0A  1. Error->() /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php:16\\x0A  2. Modules\\ModuleAppBroken\\Lib\\AppBrokenConf->getModuleWorkers() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  3. call_user_func_array() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  4. MikoPBX\\Common\\Providers\\PBXConfModulesProvider->hookModulesMethod() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:633\\x0A  5. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->prepareWorkersList() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:723\\x0A  6. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->start(",
+          "2026-10-27 09:21:01 daemon.err php.backend[36713]:  Error: Call to undefined function Modules\\ModuleAppBroken\\Lib\\module_app_broken_function_that_does_not_exist() in file /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php on line 16\\x0AStack trace:\\x0A  1. Error->() /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php:16\\x0A  2. Modules\\ModuleAppBroken\\Lib\\AppBrokenConf->getModuleWorkers() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  3. call_user_func_array() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  4. MikoPBX\\Common\\Providers\\PBXConfModulesProvider->hookModulesMethod() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:633\\x0A  5. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->prepareWorkersList() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:723\\x0A  6. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->start(",
+          "2026-10-27 09:21:06 daemon.err php.backend[36713]:  Error: Call to undefined function Modules\\ModuleAppBroken\\Lib\\module_app_broken_function_that_does_not_exist() in file /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php on line 16\\x0AStack trace:\\x0A  1. Error->() /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php:16\\x0A  2. Modules\\ModuleAppBroken\\Lib\\AppBrokenConf->getModuleWorkers() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  3. call_user_func_array() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  4. MikoPBX\\Common\\Providers\\PBXConfModulesProvider->hookModulesMethod() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:633\\x0A  5. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->prepareWorkersList() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:723\\x0A  6. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->start(",
+          "2026-10-27 09:21:07 daemon.warning php.backend[65673]:  The overlay has less than 500MB of free space available. on STORAGE",
+          "2026-10-27 09:21:12 daemon.err php.backend[36713]:  Error: Call to undefined function Modules\\ModuleAppBroken\\Lib\\module_app_broken_function_that_does_not_exist() in file /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php on line 16\\x0AStack trace:\\x0A  1. Error->() /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php:16\\x0A  2. Modules\\ModuleAppBroken\\Lib\\AppBrokenConf->getModuleWorkers() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  3. call_user_func_array() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  4. MikoPBX\\Common\\Providers\\PBXConfModulesProvider->hookModulesMethod() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:633\\x0A  5. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->prepareWorkersList() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:723\\x0A  6. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->start(",
+          "2026-10-27 09:21:17 daemon.err php.backend[36713]:  Error: Call to undefined function Modules\\ModuleAppBroken\\Lib\\module_app_broken_function_that_does_not_exist() in file /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php on line 16\\x0AStack trace:\\x0A  1. Error->() /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php:16\\x0A  2. Modules\\ModuleAppBroken\\Lib\\AppBrokenConf->getModuleWorkers() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  3. call_user_func_array() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  4. MikoPBX\\Common\\Providers\\PBXConfModulesProvider->hookModulesMethod() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:633\\x0A  5. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->prepareWorkersList() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:723\\x0A  6. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->start(",
+          "2026-10-27 09:21:22 daemon.err php.backend[36713]:  Error: Call to undefined function Modules\\ModuleAppBroken\\Lib\\module_app_broken_function_that_does_not_exist() in file /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php on line 16\\x0AStack trace:\\x0A  1. Error->() /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php:16\\x0A  2. Modules\\ModuleAppBroken\\Lib\\AppBrokenConf->getModuleWorkers() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  3. call_user_func_array() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  4. MikoPBX\\Common\\Providers\\PBXConfModulesProvider->hookModulesMethod() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:633\\x0A  5. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->prepareWorkersList() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:723\\x0A  6. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->start(",
+          "2026-10-27 09:21:27 daemon.err php.backend[36713]:  Error: Call to undefined function Modules\\ModuleAppBroken\\Lib\\module_app_broken_function_that_does_not_exist() in file /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php on line 16\\x0AStack trace:\\x0A  1. Error->() /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php:16\\x0A  2. Modules\\ModuleAppBroken\\Lib\\AppBrokenConf->getModuleWorkers() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  3. call_user_func_array() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  4. MikoPBX\\Common\\Providers\\PBXConfModulesProvider->hookModulesMethod() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:633\\x0A  5. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->prepareWorkersList() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:723\\x0A  6. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->start(",
+          "2026-10-27 09:21:30 daemon.warning php.backend[34160]:  Module operation started: {\"operation\":\"disable\",\"module\":\"ModuleAppBroken\",\"user\":\"system\",\"ip\":\"local\",\"operationId\":\"8acaba1dc7a78592c7dcc5b3\"} on MikoPBX\\PBXCoreREST\\Lib\\ModulesManagementProcessor",
+          "2026-10-27 09:21:32 daemon.err php.backend[36713]:  Error: Call to undefined function Modules\\ModuleAppBroken\\Lib\\module_app_broken_function_that_does_not_exist() in file /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php on line 16\\x0AStack trace:\\x0A  1. Error->() /storage/usbdisk1/mikopbx/custom_modules/ModuleAppBroken/Lib/AppBrokenConf.php:16\\x0A  2. Modules\\ModuleAppBroken\\Lib\\AppBrokenConf->getModuleWorkers() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  3. call_user_func_array() /offload/rootfs/usr/www/src/Common/Providers/PBXConfModulesProvider.php:105\\x0A  4. MikoPBX\\Common\\Providers\\PBXConfModulesProvider->hookModulesMethod() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:633\\x0A  5. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->prepareWorkersList() /offload/rootfs/usr/www/src/Core/Workers/Cron/WorkerSafeScriptsCore.php:723\\x0A  6. MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore->start("
+        ]
+      },
+      "outcome": "fails",
+      "retries": []
+    }
+  ],
+  "outcome": "fails",
+  "seconds": 129.6
+}
+$S/venv003/bin/python tools/check  --output $S/r003/check-broken.json  0.89s user 0.90s system 1% cpu 2:09.77 total
++(eval):13> echo 'exit broken 1'
+exit broken 1
++(eval):14> date
+Tue Oct 27 14:21:33 +08 2026

@@ -1,0 +1,203 @@
+{
+  "module_id": "ModuleAppCheck",
+  "started_at": "2026-10-27T06:16:03+00:00",
+  "rules_version": "0.1.0",
+  "schema_version": 1,
+  "config_version": 1,
+  "architecture": "arm64",
+  "steps": [
+    {
+      "name": "validate",
+      "status": "pass",
+      "detail": "rules 0.1.0, 0 recommendation(s)",
+      "seconds": 0.1
+    },
+    {
+      "name": "package",
+      "status": "pass",
+      "detail": "7 files, 2735 bytes, sha256 bb87879f9890e71025dcb5500ca77b3ff20726f26368c48a2e31dc09a0270db0",
+      "seconds": 0.1
+    },
+    {
+      "name": "package_previous",
+      "status": "pass",
+      "detail": "previous commit eb13e87500ab, sha256 57cd948bae0847307ec999da006b61c88838e4b8a4da298865a30abee216afe5",
+      "seconds": 0.1
+    }
+  ],
+  "publisher_id": 1,
+  "repo": "https://github.com/module-applications-test/ModuleAppCheck",
+  "commit": "1a4dfa6326c83d1ebcb40838ed7c0aebc24bbcda",
+  "validation": {
+    "module_id": "ModuleAppCheck",
+    "ok": true,
+    "repo": "https://github.com/module-applications-test/ModuleAppCheck",
+    "commit": "1a4dfa6326c83d1ebcb40838ed7c0aebc24bbcda",
+    "publisher_id": 1,
+    "problems": [],
+    "warnings": [],
+    "online": {
+      "entries": 7,
+      "bytes": 3443,
+      "module_json": {
+        "moduleUniqueID": "ModuleAppCheck",
+        "version": "1.1.0",
+        "min_pbx_version": "2024.1.0",
+        "developer": "module-applications pilot",
+        "support_email": "module-applications@example.com"
+      }
+    },
+    "registry": {
+      "status": "not_checked",
+      "detail": "the licence server API (LIC-613) does not exist yet: the publisher card and module_id ownership are checked at registration",
+      "source": "stub"
+    }
+  },
+  "package": {
+    "sha256": "bb87879f9890e71025dcb5500ca77b3ff20726f26368c48a2e31dc09a0270db0",
+    "bytes": 2735,
+    "files": 7,
+    "version": "1.1.0"
+  },
+  "previous_package": {
+    "commit": "eb13e87500abdf6852b3001ed63b2570ea6d0f89",
+    "sha256": "57cd948bae0847307ec999da006b61c88838e4b8a4da298865a30abee216afe5",
+    "bytes": 2737,
+    "files": 7,
+    "version": "1.0.0"
+  },
+  "runs": [
+    {
+      "mikopbx_version": "2026.6.34",
+      "steps": [
+        {
+          "name": "container",
+          "status": "pass",
+          "detail": "docker.io/mikopbx/mikopbx@sha256:ff5cc0238a4e… (arm64), network --internal",
+          "seconds": 1.9
+        },
+        {
+          "name": "boot",
+          "status": "pass",
+          "detail": "system:ping answered after 17s",
+          "seconds": 31.7
+        },
+        {
+          "name": "update",
+          "status": "pass",
+          "detail": "updated in place from 1.0.0 to 1.1.0, still enabled",
+          "seconds": 10.0,
+          "from": "1.0.0",
+          "to": "1.1.0"
+        },
+        {
+          "name": "install",
+          "status": "pass",
+          "detail": "registered, version 1.1.0, enabled",
+          "seconds": 0.1,
+          "version": "1.1.0"
+        },
+        {
+          "name": "php_lint",
+          "status": "pass",
+          "detail": "every PHP file parses (php -l on the image's PHP)",
+          "seconds": 0.1
+        },
+        {
+          "name": "enable",
+          "status": "pass",
+          "detail": "enabled",
+          "seconds": 0.1
+        },
+        {
+          "name": "services",
+          "status": "pass",
+          "detail": "1 worker process(es)",
+          "seconds": 9.3,
+          "workers": [
+            "Modules\\ModuleAppCheck\\Lib\\WorkerAppCheckMain"
+          ]
+        },
+        {
+          "name": "module_api",
+          "status": "pass",
+          "detail": "GET /pbxcore/api/modules/<id>/check answered result=true",
+          "seconds": 0.1,
+          "response": {
+            "result": true,
+            "data": {
+              "module": "ModuleAppCheck",
+              "status": "working"
+            },
+            "messages": [],
+            "function": "",
+            "processor": "Modules\\ModuleAppCheck\\Lib\\AppCheckConf::moduleRestAPICallback",
+            "pid": 41680,
+            "meta": {
+              "timestamp": "2026-10-27T09:16:57+03:00",
+              "hash": "c90bad2d0d986a1569868d292326c8c371b17b8f"
+            }
+          }
+        },
+        {
+          "name": "disable",
+          "status": "pass",
+          "detail": "disabled, no worker left",
+          "seconds": 2.3
+        },
+        {
+          "name": "uninstall",
+          "status": "pass",
+          "detail": "unregistered, directory removed",
+          "seconds": 2.3
+        },
+        {
+          "name": "logs",
+          "status": "pass",
+          "detail": "no fatal error or uncaught exception from the module",
+          "seconds": 0.1,
+          "log_bytes": 1727
+        },
+        {
+          "name": "health",
+          "status": "pass",
+          "detail": "system:ping answers, Asterisk is up",
+          "seconds": 0.6
+        }
+      ],
+      "image": {
+        "image": "docker.io/mikopbx/mikopbx",
+        "tag": "2026.6.34",
+        "digest": "sha256:ff5cc0238a4e170bfbf8c0be9a59b58c8affb6fb24b36d1506f5fc0cb41f7691",
+        "platform_digest": "sha256:3af27a8ecc070108bdde4a2e3939407eeda0574896e55a547ee221973d0b6a6c",
+        "architecture": "arm64",
+        "mikopbx_version": "2026.6.34",
+        "isolation": {
+          "network": "docker --internal",
+          "bridge": "br-244df1bb79f7",
+          "host_firewalled": false
+        }
+      },
+      "evidence": {
+        "module_log_lines": [
+          "2026-10-27 09:16:40 daemon.warning php.backend[1566]:  Module operation started: {\"operation\":\"enable\",\"module\":\"ModuleAppCheck\",\"user\":\"system\",\"ip\":\"local\",\"operationId\":\"0638a38a538cce3cb02ef376\"} on MikoPBX\\PBXCoreREST\\Lib\\ModulesManagementProcessor",
+          "2026-10-27 09:16:57 daemon.warning php.backend[42117]:  Module operation started: {\"operation\":\"disable\",\"module\":\"ModuleAppCheck\",\"user\":\"system\",\"ip\":\"local\",\"operationId\":\"af1c3048a1de240fa4dfc413\"} on MikoPBX\\PBXCoreREST\\Lib\\ModulesManagementProcessor",
+          "2026-10-27 09:16:59 daemon.warning php.backend[41680]:  Module operation started: {\"operation\":\"uninstall\",\"module\":\"ModuleAppCheck\",\"user\":\"system\",\"ip\":\"local\",\"operationId\":\"8585280fb0caa3b7a0350be2\"} on MikoPBX\\PBXCoreREST\\Lib\\ModulesManagementProcessor"
+        ],
+        "system_log_tail": [
+          "2026-10-27 09:16:38 daemon.warning php.backend[1564]:  Module operation started: {\"operation\":\"install_package\",\"module\":\"mappe97ed4a0f637\",\"user\":\"system\",\"ip\":\"local\",\"operationId\":\"e3f5d9a4fdfa2aada2cb42e6\"} on MikoPBX\\PBXCoreREST\\Lib\\ModulesManagementProcessor",
+          "2026-10-27 09:16:40 daemon.warning php.backend[1566]:  Module operation started: {\"operation\":\"enable\",\"module\":\"ModuleAppCheck\",\"user\":\"system\",\"ip\":\"local\",\"operationId\":\"0638a38a538cce3cb02ef376\"} on MikoPBX\\PBXCoreREST\\Lib\\ModulesManagementProcessor",
+          "2026-10-27 09:16:43 daemon.warning php.backend[33430]:  Module operation started: {\"operation\":\"install_package\",\"module\":\"mapp69b7eeda5965\",\"user\":\"system\",\"ip\":\"local\",\"operationId\":\"3774439f9f55e49782a94210\"} on MikoPBX\\PBXCoreREST\\Lib\\ModulesManagementProcessor",
+          "2026-10-27 09:16:44 daemon.err php.backend[1406]:  [WorkerSafeScriptsCore][MAIN][SHUTDOWN-ERROR] file_get_contents(/proc/25486/cmdline): Failed to open stream: No such file or directory from MikoPBX.Core.Workers.Cron (26.650s, PID:1406, Parent:1) on MikoPBX\\Core\\Workers\\Cron\\WorkerSafeScriptsCore start",
+          "2026-10-27 09:16:56 daemon.warning php.backend[44657]:  The overlay has less than 500MB of free space available. on STORAGE",
+          "2026-10-27 09:16:57 daemon.warning php.backend[42117]:  Module operation started: {\"operation\":\"disable\",\"module\":\"ModuleAppCheck\",\"user\":\"system\",\"ip\":\"local\",\"operationId\":\"af1c3048a1de240fa4dfc413\"} on MikoPBX\\PBXCoreREST\\Lib\\ModulesManagementProcessor",
+          "2026-10-27 09:16:59 daemon.warning php.backend[41680]:  Module operation started: {\"operation\":\"uninstall\",\"module\":\"ModuleAppCheck\",\"user\":\"system\",\"ip\":\"local\",\"operationId\":\"8585280fb0caa3b7a0350be2\"} on MikoPBX\\PBXCoreREST\\Lib\\ModulesManagementProcessor"
+        ]
+      },
+      "outcome": "passes",
+      "retries": []
+    }
+  ],
+  "outcome": "passes",
+  "seconds": 59.3
+}
