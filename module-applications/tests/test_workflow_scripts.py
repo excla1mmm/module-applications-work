@@ -181,7 +181,7 @@ def test_triage_comment_lists_the_facts():
     assert "| Rules | pass, rules 0.1.0, schema 1 |" in comment
     assert "| Publisher card | not\\_checked:" in comment
     assert "vendor owns the repository" in comment
-    assert "on main" in comment and "SECURITY.md names support_email" in comment
+    assert "on the default branch main" in comment and "SECURITY.md names support_email" in comment
     assert "| Scope | one application |" in comment
     assert "1 of 6 boxes ticked" in comment
     assert "decides nothing" in comment

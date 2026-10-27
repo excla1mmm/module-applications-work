@@ -21,12 +21,9 @@ name: "Image update"
 on:
   schedule:
     - cron: "17 3 * * *"
+  # By hand: the pull request goes to the branch the run starts on (the default branch, or a test branch whose
+  # config/mikopbx.yaml pins an older image).
   workflow_dispatch:
-    inputs:
-      config:
-        description: "Testing only: start from this config/mikopbx.yaml content (base64) instead of the committed one"
-        required: false
-        type: string
 
 permissions: {}
 
@@ -56,15 +53,8 @@ jobs:
 
       - name: Where does latest point?
         id: look
-        env:
-          START: ${{ inputs.config }}
         run: |
           set -euo pipefail
-          if [ -n "$START" ]; then
-            # Only from a person with write access (workflow_dispatch); used to test this workflow in the sandbox.
-            base64 -d <<< "$START" > config/mikopbx.yaml
-            python3 -c 'import sys, yaml; c = yaml.safe_load(open(sys.argv[1])); assert c["images"][0]["digest"].startswith("sha256:")' config/mikopbx.yaml
-          fi
           python3 tools/image_update.py --write --json > "$RUNNER_TEMP/look.json"
           cat "$RUNNER_TEMP/look.json"
           {
@@ -142,16 +132,20 @@ jobs:
           DIGEST: ${{ needs.look.outputs.digest }}
           CONTROLS: ${{ needs.controls.result }}
           RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          DEFAULT_BRANCH: ${{ github.event.repository.default_branch || 'main' }}
+          BASE_BRANCH: ${{ github.ref_name }}
         run: |
           set -euo pipefail
           [[ $VERSION =~ ^[0-9]{4}\.[0-9]+\.[0-9]+$ && $DIGEST =~ ^sha256:[0-9a-f]{64}$ ]] || { echo "::error::Unexpected version or digest."; exit 1; }
-          branch="image-update/mikopbx"
+          branch="image-update/mikopbx-$BASE_BRANCH"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -B "$branch"
           base64 -d <<< "$CONFIG" > config/mikopbx.yaml
           git add config/mikopbx.yaml
+          if git diff --cached --quiet; then
+            echo "$BASE_BRANCH already pins $DIGEST: nothing to propose."
+            exit 0
+          fi
           git commit -m "MikoPBX image $PINNED -> $VERSION ($DIGEST)"
           git push --force origin "$branch"
 
@@ -178,6 +172,6 @@ jobs:
           if [ -n "$existing" ]; then
             gh pr edit "$existing" --repo "$REPO" --title "$title" --body "$body"
           else
-            gh pr create --repo "$REPO" --head "$branch" --base "$DEFAULT_BRANCH" --title "$title" --body "$body" \
+            gh pr create --repo "$REPO" --head "$branch" --base "$BASE_BRANCH" --title "$title" --body "$body" \
               || { echo "::error::Could not open the pull request. Is 'Allow GitHub Actions to create and approve pull requests' on? The branch $branch is pushed."; exit 1; }
           fi

@@ -87,7 +87,8 @@ def build(github, repo, pr, validation):
     rows = []
 
     application = (validation.get("applications") or [{}])[0]
-    module_id = application.get("module_id", "?")
+    named = sorted({f["filename"].split("/")[1] for f in files if f["filename"].startswith("applications/") and f["filename"].count("/") >= 2})
+    module_id = application.get("module_id") or (named[0] if len(named) == 1 else "?")
     problems = application.get("problems") or []
     warnings = application.get("warnings") or []
     if not validation:
@@ -123,7 +124,9 @@ def build(github, repo, pr, validation):
             default = repo_data.get("default_branch", "main")
             compare = github.get(f"repos/{owner}/{name}/compare/{urllib.parse.quote(default)}...{commit}") or {}
             on_default = compare.get("status") in ("identical", "behind")
-            return f"`{commit[:12]}` from {date}, " + (f"on {md(default)}" if on_default else f"**not on {md(default)}** ({md(compare.get('status', '?'))})")
+            if on_default:
+                return f"`{commit[:12]}` from {date}, on the default branch {md(default)}"
+            return f"`{commit[:12]}` from {date}, **not on the default branch {md(default)}**" + (f" ({md(compare['status'])})" if compare.get("status") else "")
 
         def maintainer():
             if author.lower() == owner.lower():
