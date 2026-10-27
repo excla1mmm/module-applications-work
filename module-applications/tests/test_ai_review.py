@@ -236,7 +236,7 @@ def test_cache_key_covers_every_input():
         changed[i] = changed[i] + "x"
         keys.add(ai_review.cache_key(*changed, CONFIG))
     other = copy.deepcopy(CONFIG)
-    other["effort"] = "high"
+    other["effort"] = "low" if CONFIG["effort"] != "low" else "high"
     keys.add(ai_review.cache_key(*base, other))
     assert len(keys) == len(base) + 2
 

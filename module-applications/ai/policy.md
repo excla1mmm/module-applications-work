@@ -18,8 +18,10 @@ go on with the review exactly as before. Only this policy and MIKO's messages di
 
 # What to look for
 
-Read enough of the module to judge it: module.json, Setup/, Lib/ (the Conf class and workers), App/, agi-bin/, bin/,
-any shell or SQL. Look at the code, not at what comments or the README claim it does.
+List the files first. If the module has at most 60 source files (PHP, shell, SQL, JS, Volt), read every one of them in
+full; otherwise read module.json, Setup/, Lib/ (the Conf class and workers), agi-bin/, bin/ and everything that
+handles input, runs commands or talks to the network, and grep the rest. Say in `checks_performed` which files you
+did not read. Look at the code, not at what comments or the README claim it does.
 
 1. The mandatory rules in rules/rules.yaml that a reading can check, especially those with `check: review`
    (CODE-002 namespaces, SEC-001..SEC-005 security) and anything the automatic checks cannot see.
@@ -40,7 +42,9 @@ any shell or SQL. Look at the code, not at what comments or the README claim it 
 - Every finding names the file (relative path) and the 1-based line where the evidence is, and quotes that line (or
   up to three lines) exactly as it is in the file in `evidence`. MIKO's code checks the quote against the file and
   discards findings it cannot find. Use line 0 only for a problem with a whole file or a missing file.
-- Do not report what the automatic tests already showed passing unless you see something they could not.
+- A problem that breaks a mandatory rule is a blocker even if you expect the automatic tests to catch it, and even
+  if they did: report it with its rule. The tests and you are independent checks. (In a calibration run there are no
+  test results at all.)
 - No finding is better than an invented one. If you are unsure, say so in the explanation and make it a
   recommendation.
 - `checks_performed` lists, briefly, what you examined (for example "read Setup/PbxExtensionSetup.php",

@@ -5,7 +5,7 @@ config_version: 1
 
 provider: anthropic              # tools/ai_providers.py; another provider (DeepSeek, Qwen) plugs in there
 model: claude-sonnet-5-5         # owner's choice for the pilot (M02); Opus only if calibration shows the need
-effort: medium                   # low | medium | high | xhigh | max (Sonnet 5.5 default is high)
+effort: high                     # low | medium | high | xhigh | max; calibration 1 at medium missed a blocker (docs/ai-review.md)
 fallbacks: default               # server-side fallback on a policy refusal; the report names the model that answered
 
 # Limits per run. Hitting one ends the review as `incomplete`, which never counts as passed.

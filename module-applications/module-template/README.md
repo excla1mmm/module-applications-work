@@ -9,7 +9,7 @@ names a commit of it. For a fuller example (web pages, models, AMI worker) see
 
 ## What MikoPBX requires (mandatory) and what is advice (recommended)
 
-The full list, with an id for each rule, is [rules/rules.yaml](../rules/rules.yaml) (rules version `0.2.0`); the
+The full list, with an id for each rule, is [rules/rules.yaml](../rules/rules.yaml) (rules version `0.2.1`); the
 application format is [schema/application.schema.json](../schema/application.schema.json) (schema version 1).
 The mandatory part for the module itself:
 

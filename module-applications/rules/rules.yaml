@@ -13,7 +13,7 @@
 # Evidence: Core = mikopbx/Core develop @ e7e2109 (2026-10-27), paths under src/. Template = mikopbx/ModuleTemplate
 # @ e056e8b. Spec = Core branch docs/third-party-modules-spec, docs/superpowers/specs/2026-09-21-third-party-modules-design.md.
 
-rules_version: "0.2.0"
+rules_version: "0.2.1"
 
 rules:
   # --- The application (applications/<module_id>/application.yaml) ---------------------------------------------
@@ -159,7 +159,7 @@ rules:
     level: mandatory
     check: review
     status: accepted
-    statement: Every PHP namespace is Modules\<module_id>\<Part> (case-sensitive, three parts), matching the file path.
+    statement: Every PHP namespace starts with Modules\<module_id>\ (case-sensitive) and matches the file's path; the Conf class (Modules\<module_id>\Lib) and the models (Modules\<module_id>\Models) have exactly these three parts. Deeper namespaces elsewhere (App\Controllers, Lib\RestAPI\...) are fine.
     evidence: Core Common/Config/ClassLoader.php:54-56; Modules/Config/ConfigClass.php:105-110
   - id: CODE-003
     level: mandatory
