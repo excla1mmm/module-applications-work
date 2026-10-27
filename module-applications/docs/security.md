@@ -27,7 +27,7 @@ No zone hands its key to another, and none runs the module next to a key.
 | The module's output issues workflow commands | `::stop-commands::<random>` around everything that prints its output | `test.yaml`, `validate.yaml` |
 | External text injects Markdown or mentions into the triage comment | every external string escaped; the comment job only posts | `triage.py`, `validate.yaml` |
 | A forged result is presented as a pass | the result artifact is evidence only; the next stages must check the run, the pull request and the commit it names | `test.yaml` (documented), LIC-612/614 |
-| The image changes under the same tag | the image is pulled by digest from MIKO's config | `config/mikopbx.yaml` |
+| The image changes under the same tag | the image is pulled by digest from MIKO's config; a new digest arrives only by a reviewed pull request after the control modules pass on it, and makes earlier results stale | `config/mikopbx.yaml`, `image-update.yaml` |
 
 ## How it was tested (x86_64, 2026-10-27)
 

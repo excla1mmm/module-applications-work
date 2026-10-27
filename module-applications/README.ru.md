@@ -44,7 +44,7 @@
 | `module-template/` | Минимальный модуль, который проходит проверки, и как собрать его ZIP и запустить проверки |
 | `tools/validate.py` | Правила: офлайн (формат) и онлайн (репозиторий модуля на коммите) |
 | `tools/check` | Жизненный цикл модуля в свежем контейнере MikoPBX; `tools/package` только собирает ZIP |
-| `config/mikopbx.yaml` | Доверенная тестовая конфигурация MIKO: образы MikoPBX по digest, лимиты, таймауты |
+| `config/mikopbx.yaml` | Доверенная тестовая конфигурация MIKO: стабильный образ MikoPBX по digest, лимиты, таймауты. `image-update.yaml` предлагает новый digest через PR после прогона контрольных модулей; новый образ делает прежние результаты неактуальными |
 | `.github/workflows/` | `terms`, `cla` (соглашение издателя), `validate` (правила + triage), `test` (матрица MikoPBX) |
 | `docs/` | Как устроены проверки: [MikoPBX в Docker](docs/mikopbx-docker.md), [безопасность проверок](docs/security.md) |
 | `TERMS.md`, `PUBLISHER_AGREEMENT.md` | Черновики: текст утверждает MIKO |

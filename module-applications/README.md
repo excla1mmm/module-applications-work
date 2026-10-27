@@ -45,7 +45,7 @@ One application is one directory is one module id (GUID). Each new module needs 
 | `module-template/` | The smallest module that passes, with how to build its ZIP and run the checks |
 | `tools/validate.py` | The rules, offline (format) and online (the module's repository at the commit) |
 | `tools/check` | The module's life in a fresh MikoPBX container; `tools/package` builds just the ZIP |
-| `config/mikopbx.yaml` | MIKO's trusted test configuration: MikoPBX images by digest, limits, timeouts |
+| `config/mikopbx.yaml` | MIKO's trusted test configuration: the stable MikoPBX image by digest, limits, timeouts. `image-update.yaml` proposes a new digest by pull request after the control modules pass on it; a new image makes earlier results stale |
 | `.github/workflows/` | `terms`, `cla` (publisher agreement), `validate` (rules + triage comment), `test` (MikoPBX matrix) |
 | `docs/` | How the checks work: [MikoPBX in Docker](docs/mikopbx-docker.md), [security of the checks](docs/security.md) |
 | `TERMS.md`, `PUBLISHER_AGREEMENT.md` | Drafts: the text is approved by MIKO |

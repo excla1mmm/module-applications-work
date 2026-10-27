@@ -39,7 +39,9 @@ a pull request that touches them together with an application is rejected by the
    to the application starts all the checks again.
 8. A MIKO reviewer approves the application. The approval covers this exact commit, this revision of the application
    and the confirmed publisher: any later push to the pull request, a new `commit`, or a change of the rules makes it
-   stale, and the checks and the approval are needed again.
+   stale, and the checks and the approval are needed again. So does a new MikoPBX test image: MIKO moves the
+   pinned image (`config/mikopbx.yaml`) by a reviewed pull request, and results obtained on the old digest must be
+   run again.
 9. After the merge MIKO registers the module to your publisher account. Registration does not publish a version:
    you upload versions in the cabinet as before.
 

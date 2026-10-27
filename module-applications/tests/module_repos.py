@@ -83,6 +83,16 @@ def environment(target):
     }
 
 
+def remote_environment(repository, names):
+    """GIT_CONFIG_* variables that send https://github.com/module-applications-test/<Name> to one repository holding
+    every module (a branch each); a commit is fetched by SHA, so the branch does not matter."""
+    environment = {"GIT_CONFIG_COUNT": str(len(names))}
+    for i, name in enumerate(sorted(names)):
+        environment[f"GIT_CONFIG_KEY_{i}"] = f"url.{repository}.insteadOf"
+        environment[f"GIT_CONFIG_VALUE_{i}"] = f"{URL_BASE}{name}"
+    return environment
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("target", type=pathlib.Path)

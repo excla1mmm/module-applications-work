@@ -81,11 +81,12 @@ def main():
     parser.add_argument("--expect", type=pathlib.Path, help="YAML with what the module must show: {workers: N, api: true}")
     parser.add_argument("--output", type=pathlib.Path, help="also write the JSON result here")
     parser.add_argument("--keep", action="store_true", help="leave the container running (for debugging)")
+    parser.add_argument("--config", type=pathlib.Path, default=CONFIG, help="test configuration (default: config/mikopbx.yaml; another one only to try a new image)")
     options = parser.parse_args()
 
     started = time.monotonic()
     root, module_id = load(options.application)
-    config = validate.yaml.safe_load(CONFIG.read_text(encoding="utf-8"))
+    config = validate.yaml.safe_load(options.config.read_text(encoding="utf-8"))
     expect = validate.yaml.safe_load(options.expect.read_text(encoding="utf-8")) if options.expect else {}
     steps = Steps()
     result = {
