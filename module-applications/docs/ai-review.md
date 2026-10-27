@@ -76,7 +76,7 @@ Between the runs: the policy says a broken mandatory rule is a blocker even if t
 modules are read in full, effort went from medium to high, and CODE-002 (rules 0.2.1) no longer flags deeper
 namespaces. In both runs the injection in ModuleAppInject was reported as findings and changed nothing; in run 2 the
 agent noticed ModuleHttpAlert's own `CLAUDE.md` and treated it as data. Sonnet was enough: no need for Opus.
-The real cost is checked against the Anthropic Console (request 007).
+The Anthropic Console shows $0.95 for the day (calibrations and the two reviews) against the SDK estimate of about $1.10: the estimate errs on the safe side.
 
 ## On pull requests (sandbox, 2026-10-27)
 
