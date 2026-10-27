@@ -294,6 +294,36 @@ Endpoint и аутентификацию выбирают в LIC-613.
 9. Контрольные модули для калибровки: какие из своих (кандидат — ModuleCalleridSearchCH, пилот эпика; ModuleTemplate).
 10. Дорабатывать существующий `mikopbx/ModuleTemplate` или новый `module-template`.
 
+### 7a. Найденные ответы (облачная сессия-исполнитель, 27.10, ветка claude/stoic-goldberg-n01ons)
+
+1. **Образы — отвечено.** Docker Hub `mikopbx/mikopbx:2026.6.34` (= `latest`), multi-arch index
+   `sha256:ff5cc0238a4e170bfbf8c0be9a59b58c8affb6fb24b36d1506f5fc0cb41f7691`: amd64 `sha256:50ed8982…f1d5d`,
+   arm64 `sha256:3af27a8e…b6a6c`; есть `dev` = 2026.6.43-dev. `--privileged` не нужен (проверено на x86_64 в Docker),
+   тома не нужны, старт REST API ~18 с. С `--network none` не загружается (Asterisk без интерфейса) → используется
+   `docker network create --internal` + iptables на мост. На GitHub runner и arm64 — ещё не проверено (песочница, Mac).
+   Подробно: `module-applications/docs/mikopbx-docker.md`.
+4. **Список требований — частично.** Собран из Core develop @e7e2109, ModuleTemplate и спецификации
+   `docs/third-party-modules-spec`: `module-applications/rules/rules.yaml` (rules 0.1.0, у каждого id; mandatory vs
+   recommended; спорные — `status: draft` для LIC-319). Канонический список по-прежнему за LIC-319.
+10. **module-template — решено (предложение исполнителя).** Каталог `module-template/` внутри module-applications:
+    минимальный модуль, который проходит все проверки, + инструкции RU/EN по сборке ZIP из SHA (`tools/package`) и
+    локальному прогону (`tools/validate.py`, `tools/check`). Шаблон версионируется вместе с правилами и схемой и
+    проверяется тестом; `mikopbx/ModuleTemplate` не трогаем (полный пример с UI остаётся там).
+
+Попутно выяснено (не было в вопросах):
+- module_id: Core принимает `^[A-Za-z0-9_-]{1,128}$`, REST v3 адресует только `^[A-Za-z][A-Za-z0-9]*$`, спецификация
+  маркетплейса — `^Module[A-Za-z0-9]{1,60}$`; в схеме заявки взято последнее (пересечение всех трёх).
+- `min_pbx_version` в module.json Core сравнивает `version_compare` только при установке; ниже 2020.2.468 (или пусто,
+  или `%ModuleVersion%`) — модуль ставится, но отключается при следующем обновлении АТС. Поэтому правило MJ-003.
+- `version` Core не проверяет; `%ModuleVersion%` из ModuleTemplate ставится как есть. Сборка заменяет его на
+  `0.0.0-<12 hex коммита>`.
+- MikoPBX 2026.6.34 отличается от Core develop: `uninstall` без `keepSettings` падает, `GET /modules` (getList) не
+  реализован, `getInstallationStatus` не работает с новым конвейером установки.
+- `repo` (обязательный) и `source_url` каталога (опциональный) разведены в CONTRIBUTING; решение по непубличным
+  исходникам и старым модулям — за владельцем (вопрос 6 остаётся).
+
+Открытыми остаются 2, 3, 5, 6, 7, 8, 9 и часть 4.
+
 ---
 
 ## 8. План работ
