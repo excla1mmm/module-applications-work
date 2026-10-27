@@ -442,6 +442,30 @@ class Skip(Exception):
     """No review: the reason is reported, and nothing is spent."""
 
 
+class NoApplication(Exception):
+    """A maintenance pull request that changes no application: the review has nothing to do and says so."""
+
+    def __init__(self, pull_request, head):
+        super().__init__(f"pull request #{pull_request} changes no application")
+        self.pull_request, self.head = pull_request, head
+
+
+def maintenance(github, run):
+    """Raise NoApplication if the test run was for an owners' or members' pull request touching no application.
+
+    Checked through the API (the pull request's author, head and files), not inferred from a missing artifact."""
+    for listed in run.get("pull_requests") or []:
+        pull = github.get(f"pulls/{listed['number']}")
+        if pull.get("state") != "open" or pull["head"]["sha"] != listed["head"]["sha"]:
+            continue
+        if pull.get("author_association") not in ("OWNER", "MEMBER"):
+            continue
+        files = github.get(f"pulls/{listed['number']}/files?per_page=100")
+        if pull.get("changed_files", 0) <= 100 and not any(
+                f["filename"].startswith("applications/") or str(f.get("previous_filename", "")).startswith("applications/") for f in files):
+            raise NoApplication(listed["number"], pull["head"]["sha"])
+
+
 def prepare(github, run_id, out, force=False, config=None, now=None):
     """Check the test run against the GitHub API and write the review's inputs. Raise Skip with a reason otherwise."""
     config = config or load_config()
@@ -453,6 +477,7 @@ def prepare(github, run_id, out, force=False, config=None, now=None):
         raise Skip(f"run {run_id} is not a finished test of a pull request")
     artifacts = {a["name"]: a for a in github.get(f"actions/runs/{run_id}/artifacts?per_page=100")["artifacts"] if not a.get("expired")}
     if "provenance" not in artifacts:
+        maintenance(github, run)
         raise Skip("the test run has no provenance (no application was tested)")
     provenance = json.loads(github.artifact(artifacts["provenance"])["provenance.json"])
     module_id, number = provenance["module_id"], int(provenance["pull_request"])
@@ -649,6 +674,9 @@ def main(argv=None):
             context, cached = prepare(github, options.run_id, options.out, options.force)
         except Skip as skip:
             print(json.dumps({"decision": "skip", "reason": str(skip)}))
+            return 0
+        except NoApplication as none:
+            print(json.dumps({"decision": "no_application", "reason": str(none), "pull_request": none.pull_request, "head": none.head}))
             return 0
         print(json.dumps({"decision": "cached" if cached else "review", "pull_request": context["test_run"]["pull_request"],
                           "module_id": context["module_id"], "commit": context["commit"], "head": context["test_run"]["head"],

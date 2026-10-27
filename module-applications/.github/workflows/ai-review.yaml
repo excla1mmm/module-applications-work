@@ -168,7 +168,7 @@ jobs:
 
   comment:
     needs: [prepare, review]
-    if: always() && needs.prepare.outputs.pull_request != '' && needs.review.result != 'skipped'
+    if: always() && needs.prepare.outputs.pull_request != '' && (needs.review.result != 'skipped' || needs.prepare.outputs.decision == 'no_application')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -188,11 +188,19 @@ jobs:
           PR: ${{ needs.prepare.outputs.pull_request }}
           HEAD_SHA: ${{ needs.prepare.outputs.head }}
           PASSED: ${{ needs.review.outputs.passed }}
+          DECISION: ${{ needs.prepare.outputs.decision }}
           REVIEW: ${{ needs.review.result }}
           RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           set -euo pipefail
           [[ $PR =~ ^[0-9]+$ && $HEAD_SHA =~ ^[0-9a-f]{40}$ ]] || { echo "::error::Bad pull request or head."; exit 1; }
+          if [ "$DECISION" = no_application ]; then
+            # Maintenance by the owners or members (checked through the API): a status only, so that branch
+            # protection can require "AI review" on every pull request.
+            jq -n --arg url "$RUN" '{state: "success", context: "AI review", description: "no application in this pull request", target_url: $url}' \
+              | gh api --method POST "repos/$REPO/statuses/$HEAD_SHA" --input - > /dev/null
+            exit 0
+          fi
           if [ "$REVIEW" = success ] && [ -s report/report.md ]; then
             body=$(cat report/report.md)
             if [ "$PASSED" = true ]; then state=success; text="complete, no blockers (a person decides)"; else state=failure; text="blockers found or review incomplete"; fi

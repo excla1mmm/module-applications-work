@@ -16,6 +16,7 @@
 #   head        the pull request's head commit
 #   module_id   empty if the pull request changes no application or removes one
 #   previous    the application's commit on the base branch, if it differs (the version to update from)
+#   maintenance true for a pull request by the owners or members that changes no application
 # Exits 1, with ::error::, if the pull request changes anything else (rules APP-006, APP-003).
 set -euo pipefail
 export LC_ALL=C
@@ -33,6 +34,16 @@ echo "head=$head" >> "$GITHUB_OUTPUT"
 
 # Every changed path, a renamed file under both names, must be inside one applications/<module_id>/.
 gh api "repos/$REPO/pulls/$PR/files?per_page=100" --jq '.[] | .filename, (.previous_filename // empty)' > "$RUNNER_TEMP/paths"
+
+# A pull request from the repository's owners or organisation members that touches no application is maintenance
+# (tools, rules, workflows, documentation, the image update): there is nothing to take or test. Anyone else, or any
+# pull request that also touches applications/, goes through the rules below.
+association=$(jq -r .author_association <<< "$pull")
+if ! grep -q '^applications/' "$RUNNER_TEMP/paths" && [[ $association == OWNER || $association == MEMBER ]]; then
+  echo "A maintenance pull request ($association) that changes no application: nothing to check."
+  echo "maintenance=true" >> "$GITHUB_OUTPUT"
+  exit 0
+fi
 module_id=$(python3 tools/validate.py --pr-paths "$RUNNER_TEMP/paths") \
   || fail "This pull request changes files outside one applications/<module_id>/ (listed above). An application changes nothing else."
 if [ -z "$module_id" ]; then

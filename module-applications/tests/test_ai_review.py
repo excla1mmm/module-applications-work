@@ -447,3 +447,22 @@ def test_calibration_scores_caught_missed_and_false_positives(tmp_path, repos):
     assert check["false_positives"] == ["LIFE-001 module.json:3"]
     assert probe["status"] == "not run: calibration budget spent"  # 0.5 + 0.5 reached the 1.0 budget
     assert (tmp_path / "out" / "ModuleAppBroken.json").exists() and "| ModuleAppBroken | complete |" in ai_review.render_calibration(summary)
+
+
+def test_prepare_reports_a_maintenance_pull_request_checked_through_the_api(tmp_path, package_sha):
+    github = FakeGitHub(package_sha, run={**FakeGitHub(package_sha).run, "pull_requests": [{"number": 1, "head": {"sha": "b" * 40}}]})
+    del github.files["provenance"]
+    github.pull = {"state": "open", "head": {"sha": "b" * 40}, "author_association": "OWNER", "changed_files": 1}
+    original = github.get
+    github.get = lambda path, accept=None: [{"filename": "tools/validate.py"}] if path.startswith("pulls/1/files") else original(path, accept)
+    with pytest.raises(ai_review.NoApplication) as raised:
+        ai_review.prepare(github, 7, tmp_path / "in")
+    assert raised.value.pull_request == 1 and raised.value.head == "b" * 40
+    # The same pull request from someone else, or touching an application, is not maintenance.
+    github.pull = {**github.pull, "author_association": "CONTRIBUTOR"}
+    with pytest.raises(ai_review.Skip, match="no provenance"):
+        ai_review.prepare(github, 7, tmp_path / "in")
+    github.pull = {**github.pull, "author_association": "OWNER"}
+    github.get = lambda path, accept=None: [{"filename": "applications/X/application.yaml"}] if path.startswith("pulls/1/files") else original(path, accept)
+    with pytest.raises(ai_review.Skip, match="no provenance"):
+        ai_review.prepare(github, 7, tmp_path / "in")

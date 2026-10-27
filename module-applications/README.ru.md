@@ -46,7 +46,7 @@ merge ещё не сделана.
 | `tools/check` | Жизненный цикл модуля в свежем контейнере MikoPBX; `tools/package` только собирает ZIP |
 | `config/mikopbx.yaml` | Доверенная тестовая конфигурация MIKO: стабильный образ MikoPBX по digest, лимиты, таймауты. `image-update.yaml` предлагает новый digest через PR после прогона контрольных модулей; новый образ делает прежние результаты неактуальными |
 | `.github/workflows/` | `terms`, `cla` (соглашение издателя), `validate` (правила + triage), `test` (матрица MikoPBX), `ai-review` (этап 3), `image-update` |
-| `docs/` | Как устроены проверки: [MikoPBX в Docker](docs/mikopbx-docker.md), [AI-ревью](docs/ai-review.md), [безопасность проверок](docs/security.md) |
+| `docs/` | Как устроены проверки: [MikoPBX в Docker](docs/mikopbx-docker.md), [AI-ревью](docs/ai-review.md), [безопасность проверок](docs/security.md), [защита ветки](docs/branch-protection.md) |
 | `TERMS.md`, `PUBLISHER_AGREEMENT.md` | Черновики: текст утверждает MIKO |
 
 Локально и в CI работает один и тот же код. Workflows, инструменты, правила и конфигурация всегда берутся из базовой

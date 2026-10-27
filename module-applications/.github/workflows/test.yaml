@@ -32,9 +32,10 @@ name: "Test"
 run-name: ${{ github.event.pull_request.title || format('Pull request {0}', inputs.pr) }}
 
 on:
+  # Every pull request, so that `result` can be a required check (branch protection): a maintenance pull request
+  # by the owners or members passes it without testing anything; any other change outside one application fails.
   pull_request_target:
     types: [opened, reopened, synchronize]
-    paths: ["applications/**"]
   workflow_dispatch:
     inputs:
       pr:
@@ -196,3 +197,23 @@ jobs:
           path: result.json
           if-no-files-found: ignore
           retention-days: 7
+
+  result:
+    # The one check branch protection requires from this workflow: the application's tests passed on every declared
+    # architecture, or the pull request is maintenance that changes no application. Runs nothing from the module.
+    needs: [application, module]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    permissions: {}
+    steps:
+      - name: Every test passed, or there was no application to test
+        env:
+          APPLICATION: ${{ needs.application.result }}
+          MODULE_ID: ${{ needs.application.outputs.module_id }}
+          MODULE: ${{ needs.module.result }}
+        run: |
+          if [ "$APPLICATION" != success ]; then echo "::error::The pull request was not accepted for testing ($APPLICATION)."; exit 1; fi
+          if [ -z "$MODULE_ID" ]; then echo "No application in this pull request: nothing to test."; exit 0; fi
+          if [ "$MODULE" != success ]; then echo "::error::$MODULE_ID did not pass on every architecture ($MODULE)."; exit 1; fi
+          echo "$MODULE_ID passed on every declared architecture."

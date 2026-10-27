@@ -38,8 +38,9 @@ Test (pull_request_target)            AI review (workflow_run, default branch)
   report.json` says whether it still applies; the registration after merge (LIC-614) must call it. The commit status
   sits on the tested head, so a new push leaves the new head without it.
 - **Cache.** A report is reused (artifact `ai-report-<key>`, 30 days) only when all of the above are the same.
-- **Limits** (`config/ai-review.yaml`): 40 turns, $1.50 (estimate), 15 minutes, 16 000 output tokens per request,
-  3 MB of source read, 3 reviews per pull request a day, 2 SDK retries. To be revisited after calibration.
+- **Limits** (`config/ai-review.yaml`): 25 turns, $0.75 (estimate), 10 minutes, 16 000 output tokens per request,
+  3 MB of source read, 3 reviews per pull request a day, 2 SDK retries: about three times the largest module of
+  calibration run 2.
 
 ## Report
 
@@ -63,3 +64,16 @@ module) is in the run summary and the `ai-calibration` artifact.
 | ModuleAppProbe | reads every process's environment and probes the network (SEC-00x) |
 | ModuleTemplate | MIKO's template: no blocker expected (false positives) |
 | ModuleCalleridSearchCH, ModuleHttpAlert | real modules, exploratory |
+
+## Calibration results
+
+| Run | Model, effort | Caught / expected | Missed | False positive blockers | Rejected findings | Spent (estimate) | Per module, max |
+|---|---|---|---|---|---|---|---|
+| 1 ([summary](calibration/2026-10-27-run1/summary.md)) | claude-sonnet-5-5, medium | 3 / 4 | ModuleAppBroken CODE-003 (filed as a recommendation: "the tests should catch it") | 0 | 0 | $0.25 | 6 turns, $0.05, 20 s |
+| 2 ([summary](calibration/2026-10-27-run2/summary.md)) | claude-sonnet-5-5, high | 4 / 4 | — | 0 | 0 | $0.75 | 7 turns, $0.25, 114 s |
+
+Between the runs: the policy says a broken mandatory rule is a blocker even if the tests should catch it, small
+modules are read in full, effort went from medium to high, and CODE-002 (rules 0.2.1) no longer flags deeper
+namespaces. In both runs the injection in ModuleAppInject was reported as findings and changed nothing; in run 2 the
+agent noticed ModuleHttpAlert's own `CLAUDE.md` and treated it as data. Sonnet was enough: no need for Opus.
+The real cost is checked against the Anthropic Console (request 007).

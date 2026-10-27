@@ -59,11 +59,11 @@ def repository(tmp_path):
     return base, pull_request
 
 
-def run_take(base, tmp_path, head, paths):
+def run_take(base, tmp_path, head, paths, association="NONE"):
     """Run take_application.sh in `base` with a fake gh that serves this pull request."""
     bin_dir = tmp_path / "bin"
     bin_dir.mkdir(exist_ok=True)
-    (tmp_path / "pull.json").write_text(json.dumps({"head": {"sha": head}, "changed_files": len(paths)}))
+    (tmp_path / "pull.json").write_text(json.dumps({"head": {"sha": head}, "changed_files": len(paths), "author_association": association}))
     (tmp_path / "files.txt").write_text("".join(f"{p}\n" for p in paths))
     gh = bin_dir / "gh"
     gh.write_text(f"""#!/bin/sh
@@ -138,6 +138,28 @@ def test_take_application_withdrawal_tests_nothing(repository, tmp_path):
     done, values = run_take(base, tmp_path, head, paths)
     assert done.returncode == 0 and "a withdrawal" in done.stdout
     assert "module_id" not in values
+
+
+def test_take_application_lets_owners_maintain_without_an_application(repository, tmp_path):
+    base, pull_request = repository
+    head, paths = pull_request({"tools/validate.py": "# changed\n"})
+    done, values = run_take(base, tmp_path, head, paths, association="OWNER")
+    assert done.returncode == 0 and "maintenance pull request (OWNER)" in done.stdout
+    assert values.get("maintenance") == "true" and "module_id" not in values
+
+
+def test_take_application_refuses_the_same_change_from_anyone_else(repository, tmp_path):
+    base, pull_request = repository
+    head, paths = pull_request({"tools/validate.py": "# changed\n"})
+    done, values = run_take(base, tmp_path, head, paths, association="CONTRIBUTOR")
+    assert done.returncode == 1 and "[APP-006]" in done.stderr and "maintenance" not in values
+
+
+def test_an_owner_cannot_mix_an_application_with_other_changes(repository, tmp_path):
+    base, pull_request = repository
+    head, paths = pull_request({"applications/ModuleAppCheck/application.yaml": GOOD, ".github/workflows/test.yaml": "on: push\n"})
+    done, _ = run_take(base, tmp_path, head, paths, association="OWNER")
+    assert done.returncode == 1 and "[APP-006]" in done.stderr
 
 
 class FakeGitHub:

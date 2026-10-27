@@ -47,7 +47,7 @@ One application is one directory is one module id (GUID). Each new module needs 
 | `tools/check` | The module's life in a fresh MikoPBX container; `tools/package` builds just the ZIP |
 | `config/mikopbx.yaml` | MIKO's trusted test configuration: the stable MikoPBX image by digest, limits, timeouts. `image-update.yaml` proposes a new digest by pull request after the control modules pass on it; a new image makes earlier results stale |
 | `.github/workflows/` | `terms`, `cla` (publisher agreement), `validate` (rules + triage comment), `test` (MikoPBX matrix), `ai-review` (stage 3), `image-update` |
-| `docs/` | How the checks work: [MikoPBX in Docker](docs/mikopbx-docker.md), [AI review](docs/ai-review.md), [security of the checks](docs/security.md) |
+| `docs/` | How the checks work: [MikoPBX in Docker](docs/mikopbx-docker.md), [AI review](docs/ai-review.md), [security of the checks](docs/security.md), [branch protection](docs/branch-protection.md) |
 | `TERMS.md`, `PUBLISHER_AGREEMENT.md` | Drafts: the text is approved by MIKO |
 
 The checks run the same code locally and in CI. The workflows, tools, rules and configuration always come from the
