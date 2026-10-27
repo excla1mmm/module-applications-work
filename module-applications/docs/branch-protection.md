@@ -8,7 +8,7 @@ default branch.
 | Setting | Value | Why |
 |---|---|---|
 | Enforcement | Active | |
-| Bypass list | empty (or option A below for the image update) | owners and admins go through the same gate (LIC-614: "the bypass rights are accounted for") |
+| Bypass list | **empty** | owners and admins go through the same gate (LIC-614: "the bypass rights are accounted for"); a bypass let a pull request into `main` without its checks in the sandbox, see below |
 | Restrict deletions, Block force pushes | on | the registry's history is the record |
 | Require a pull request before merging | on, 1 approval | MIKO's decision is a person's |
 | Dismiss stale pull request approvals when new commits are pushed | on | an approval covers one commit and one revision of the application |
@@ -33,17 +33,20 @@ What each required check means:
 
 `image-update.yaml` opens its pull request with GITHUB_TOKEN, and GitHub starts no workflow for such a pull request,
 so the required checks never appear on it and the ruleset blocks it. The control modules have already run in the
-image update's own run (linked from the pull request). Two ways out, MIKO's choice:
+image update's own run (linked from the pull request). Ways out, MIKO's choice:
 
-- **A. Admin bypass for pull requests only** (pilot): in the ruleset's bypass list add *Repository admin*, mode
-  *For pull requests only*. Direct pushes stay blocked; an admin can merge a pull request without its checks, and
-  GitHub records each bypass. By convention only image update pull requests are merged this way. Weaker: the
-  convention is not enforced.
-- **B. A GitHub App for the image update**: the workflow opens the pull request with the App's token (stored as a
-  secret in its own environment, `image-update`), so the normal checks run on it and no bypass is needed. Stronger,
-  but one more credential to own.
+- **B. A GitHub App for the image update** (recommended): the workflow opens the pull request with the App's token
+  (stored as a secret in its own environment, `image-update`), so the normal checks run on it and no bypass is
+  needed. One more credential to own.
+- **Manual**: an admin sets the ruleset to *Disabled*, merges the image update pull request and sets it back to
+  *Active*. GitHub records both changes in the audit log. Use rarely; nothing stops another merge in that window.
+- **A. Admin bypass for pull requests only** — **not recommended.** With *Repository admin* in the bypass list
+  (mode *For pull requests only*) direct pushes stay blocked, but an admin can merge **any** pull request without
+  its checks, and so can an agent acting through a GitHub App on that admin's behalf. The convention "only image
+  update pull requests" is not enforced and was broken in the sandbox (below).
 
-Also: Settings → Actions → General → "Allow GitHub Actions to create and approve pull requests" on (needed for A).
+Also: Settings → Actions → General → "Allow GitHub Actions to create and approve pull requests" on (needed for the
+workflow to open its pull request at all).
 
 ## In the sandbox (2026-10-27)
 
