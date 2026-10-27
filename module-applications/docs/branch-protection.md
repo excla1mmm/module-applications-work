@@ -50,17 +50,28 @@ workflow to open its pull request at all).
 
 ## In the sandbox (2026-10-27)
 
-Ruleset `main: applications gate` (id 25947319) on excla1mmm/module-applications follows the table, option A, with
-two differences for a one-person sandbox: "Require approval of the most recent reviewable push" is **off** (turn it
-on in the real repository) and code owner review is off (no CODEOWNERS yet).
+Ruleset `main: applications gate` (id 25947319) on excla1mmm/module-applications follows the table with an **empty
+bypass list**, and two differences for a one-person sandbox: "Require approval of the most recent reviewable push" is
+**off** (turn it on in the real repository) and code owner review is off (no CODEOWNERS yet).
 
-Checked without using the bypass:
+**What went wrong first.** The ruleset was created at 09:52Z with option A (repository admin, pull requests only).
+At 10:05Z pull request #6 was merged into `main` through that bypass, by hand, while its head 90adbc2 had no `AI review`
+status and `agreement` failed. Nothing in GitHub limits option A to image update pull requests, and an agent acting
+through a GitHub App on an admin's behalf has the same power. The bypass was removed, and #6 was reverted by #10
+(merged with the ruleset briefly set to *Disabled*; both changes are in the audit log). The agents never merged #6.
+
+Checked again after that, with no bypass (ruleset read through the API: `enforcement: active`, `bypass_actors: []`,
+`current_user_can_bypass: never`):
 
 - a direct push to `main` is refused: `GH013: Repository rule violations ... Changes must be made through a pull
-  request. 5 of 5 required status checks are expected.`, `main` unchanged;
-- a pull request whose tests fail (#8: `result` failure, no `AI review` status) cannot be merged;
-- a push after the AI review (#6: the reviewed head had `AI review` = success; after a new commit the new head has no
-  `AI review` status until the review runs again) cannot be merged;
+  request. 5 of 5 required status checks are expected.`, `main` unchanged (42d9f17);
+- a pull request whose tests fail (#8: `result` failure, no `AI review` status) — a merge through the API as the
+  repository admin is refused: `405 Repository rule violations found. At least 1 approving review is required ...
+  5 of 5 required status checks are expected.`;
+- a pull request with AI review blockers (#7: `AI review` failure) — the same 405;
+- a push after the AI review (#11, a maintenance probe: the first head 2bdd585 got `AI review` = success; the next
+  commit 1a975f4 had no statuses at all) — a merge through the API right after the push is refused: `405 ... 5 of 5
+  required status checks have not succeeded: 2 expected.` The probe was closed unmerged;
 - force push: the `non_fast_forward` rule is active (read from the API); not attempted, because if the rule failed it
   would rewrite the history of `main`.
 
