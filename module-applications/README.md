@@ -42,7 +42,8 @@ module (rule LIFE-007):
 
 - the package as it is is installed first: MikoPBX must refuse it for the licence, and only for the licence;
 - install, enable, workers, the module's API, disable, uninstall, the logs and MikoPBX's health are then checked on a
-  test copy of the same commit with the licence ids set to 0;
+  test copy of the same commit with the licence ids set to 0. Both ZIPs are unpacked and compared: the copy may differ
+  only in `module.json`, only in those ids. The result, the Test summary and the AI report give the sha256 of both;
 - licence activation and capture, and whatever the module does only with a licence, are **not checked**: the result
   says `license_required` for them, never "pass", and the triage comment marks the module as paid.
 

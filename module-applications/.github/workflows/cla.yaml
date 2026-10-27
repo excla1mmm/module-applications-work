@@ -27,8 +27,36 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      # The agreement is for publishers of applications. A pull request by the repository's owners or members that
+      # changes nothing under applications/ is maintenance (as in terms.yaml and take_application.sh): it needs no
+      # signature. Only the API is read; nothing from the pull request is checked out or run.
+      - name: Maintenance by the owners or members
+        id: scope
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
+          ASSOCIATION: ${{ github.event.pull_request.author_association || github.event.issue.author_association }}
+        run: |
+          maintenance=false
+          case "$ASSOCIATION" in
+            OWNER|MEMBER)
+              if paths=$(gh api --paginate "repos/$REPO/pulls/$NUMBER/files?per_page=100" --jq '.[] | .filename, (.previous_filename // empty)'); then
+                # The API lists at most 3000 files: a longer list may hide an application, so it is not maintenance.
+                if [ "$(printf '%s\n' "$paths" | grep -c .)" -lt 3000 ] && ! printf '%s\n' "$paths" | grep -q '^applications/'; then
+                  maintenance=true
+                fi
+              else
+                echo "::warning::Cannot list the changed files: the agreement is required."
+              fi ;;
+          esac
+          if [ "$maintenance" = true ]; then
+            echo "A maintenance pull request ($ASSOCIATION) that changes no application: no publisher agreement needed."
+          fi
+          echo "maintenance=$maintenance" >> "$GITHUB_OUTPUT"
+
       - name: "Publisher agreement"
-        if: github.event_name == 'pull_request_target' || contains(github.event.comment.body, 'recheck') || contains(github.event.comment.body, 'I have read the MikoPBX Publisher Agreement and I hereby sign it')
+        if: steps.scope.outputs.maintenance != 'true' && (github.event_name == 'pull_request_target' || contains(github.event.comment.body, 'recheck') || contains(github.event.comment.body, 'I have read the MikoPBX Publisher Agreement and I hereby sign it'))
         uses: iainmcgin/cla-github-action@0d27e5a16278d4adb6b0c4b92f08ad27b0a21dc8 # v3.2.0 (sha-pinned)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

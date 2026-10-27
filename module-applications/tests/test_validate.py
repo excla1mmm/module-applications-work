@@ -207,6 +207,19 @@ def test_paid_module_gets_a_test_copy_without_licence_ids(tmp_path, repos):
         original, tested = json.loads(paid.read("module.json")), json.loads(copy.read("module.json"))
         assert (tested["lic_product_id"], tested["lic_feature_id"]) == (0, 0)
         assert {k: v for k, v in tested.items() if not k.startswith("lic_")} == {k: v for k, v in original.items() if not k.startswith("lic_")}
+    assert info["test_copy_diff"] == {"files": ["module.json"], "module_json_keys": ["lic_feature_id", "lic_product_id"]}
+    # The comparison catches a copy that differs in anything else.
+    with zipfile.ZipFile(tmp_path / "paid.test.zip") as copy, zipfile.ZipFile(tmp_path / "tampered.zip", "w") as tampered:
+        for name in copy.namelist():
+            data = copy.read(name)
+            tampered.writestr(name, data.replace(b"1.0.0", b"9.9.9") if name == "module.json" else data)
+    with pytest.raises(check_install.Failed, match="not only in licence ids"):
+        check_install.compare_test_copy(tmp_path / "paid.zip", tmp_path / "tampered.zip")
+    with zipfile.ZipFile(tmp_path / "paid.test.zip") as copy, zipfile.ZipFile(tmp_path / "extra.zip", "w") as extra:
+        for name in copy.namelist():
+            extra.writestr(name, copy.read(name) + (b"\n" if name.endswith(".php") else b""))
+    with pytest.raises(check_install.Failed, match="not only in module.json"):
+        check_install.compare_test_copy(tmp_path / "paid.zip", tmp_path / "extra.zip")
     # A free module gets no test copy.
     free = check_install.package("https://github.com/module-applications-test/ModuleAppCheck", repos["ModuleAppCheck"][-1],
                                  tmp_path / "f", tmp_path / "free.zip", test_copy=tmp_path / "free.test.zip")

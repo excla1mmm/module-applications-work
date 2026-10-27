@@ -282,6 +282,7 @@ def build_report(context, config, result, root, rules):
         "repo": context["repo"],
         "commit": context["commit"],
         "package_sha256": context["package_sha256"],
+        "test_copy_sha256": context.get("test_copy_sha256"),
         "application_sha256": context["application_sha256"],
         "rules_version": context["rules_version"],
         "image_digest": context["image_digest"],
@@ -383,6 +384,8 @@ def render(report):
     lines += [
         "| | |", "|---|---|",
         f"| Package sha256 | `{report['package_sha256']}` |",
+        *([f"| Paid module: test copy sha256 | `{report['test_copy_sha256']}` (the package with module.json's licence ids set to 0; licence-gated behaviour not tested) |"]
+          if report.get("test_copy_sha256") else []),
         f"| Rules / image | {md(report['rules_version'])} / `{md(report['image_digest'][:19])}…` |",
         f"| Tests | run {report['test_run'].get('id')}: {md(report['test_run'].get('test_outcome'))} on {', '.join(report['test_run'].get('architectures', []))} |",
         f"| Model | {md(report['agent']['model'])}" + (f" (answered by {md(report['agent']['answered_by'])})" if report['agent'].get('answered_by') and report['agent']['answered_by'] != report['agent']['model'] else "") + f", effort {md(report['agent']['effort'])} |",
@@ -504,7 +507,8 @@ def prepare(github, run_id, out, force=False, config=None, now=None):
 
     with tempfile.TemporaryDirectory() as work:
         work = pathlib.Path(work)
-        package = check_install.package(application["repo"], application["commit"], work / "git-zip", work / "module.zip")
+        package = check_install.package(application["repo"], application["commit"], work / "git-zip", work / "module.zip",
+                                        test_copy=work / "module.test.zip")
         tar = source_tar(application["repo"], application["commit"], work / "git-tar")
     image_digest = validate.yaml.safe_load((BASE / "config" / "mikopbx.yaml").read_text())["images"][0]["digest"]
     results = {}
@@ -520,6 +524,8 @@ def prepare(github, run_id, out, force=False, config=None, now=None):
             raise Skip(f"the {arch} result is for another module or commit: not accepted")
         if (result.get("package") or {}).get("sha256") != package["sha256"]:
             raise Skip(f"the {arch} result names package {str((result.get('package') or {}).get('sha256'))[:12]}, the commit builds {package['sha256'][:12]}: not accepted")
+        if (result.get("package") or {}).get("test_copy_sha256") != package.get("test_copy_sha256"):
+            raise Skip(f"the {arch} result names test copy {str((result.get('package') or {}).get('test_copy_sha256'))[:12]}, the commit builds {str(package.get('test_copy_sha256'))[:12]}: not accepted")
         digests = {(r.get("image") or {}).get("digest") for r in result.get("runs", [])}
         if digests != {image_digest}:
             raise Skip(f"the {arch} result was not obtained on the current MikoPBX image: stale")
@@ -532,7 +538,8 @@ def prepare(github, run_id, out, force=False, config=None, now=None):
     key = cache_key(application["commit"], package["sha256"], application_sha, rules_version, image_digest, config)
     context = {
         "module_id": module_id, "publisher_id": application.get("publisher_id"), "repo": application["repo"],
-        "commit": application["commit"], "package_sha256": package["sha256"], "application_sha256": application_sha,
+        "commit": application["commit"], "package_sha256": package["sha256"], "test_copy_sha256": package.get("test_copy_sha256"),
+        "application_sha256": application_sha,
         "application_text": application_bytes.decode("utf-8", errors="replace"), "rules_version": rules_version,
         "image_digest": image_digest, "cache_key": key, "results": results, "forced": bool(force and test_outcome != "passed"),
         "test_run": {"id": int(run_id), "url": run.get("html_url"), "pull_request": number, "head": provenance["head"],

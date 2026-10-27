@@ -18,6 +18,7 @@
     "repo": {"type": "string"},
     "commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
     "package_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "test_copy_sha256": {"description": "Paid module only (rule LIFE-007): the ZIP the tests installed, the package with module.json's licence ids set to 0.", "type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"},
     "application_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
     "rules_version": {"type": "string"},
     "image_digest": {"type": "string"},

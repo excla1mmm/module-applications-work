@@ -118,7 +118,26 @@ def package(repo, commit, git_dir, out_path, timeout=120, test_copy=None):
     if test_copy and any(licence.values()):
         unlicensed = [(m, without_licence(d) if m.name == "module.json" else d) for m, d in entries]
         info["test_copy_sha256"] = write_zip(unlicensed, when, test_copy)["sha256"]
+        info["test_copy_diff"] = compare_test_copy(out_path, test_copy)
     return info
+
+
+def compare_test_copy(package_zip, copy_zip):
+    """Unpack both ZIPs and prove the test copy differs from the package only in module.json's licence ids.
+
+    Return what differs ({"files": ["module.json"], "module_json_keys": [...]}); raise Failed on anything else.
+    """
+    with zipfile.ZipFile(package_zip) as package, zipfile.ZipFile(copy_zip) as copy:
+        if package.namelist() != copy.namelist():
+            raise Failed("the test copy does not hold the same files as the package")
+        differing = [name for name in package.namelist() if package.read(name) != copy.read(name)]
+        if differing != ["module.json"]:
+            raise Failed(f"the test copy differs from the package in {differing}, not only in module.json")
+        original, tested = json.loads(package.read("module.json")), json.loads(copy.read("module.json"))
+    keys = sorted(k for k in original.keys() | tested.keys() if original.get(k) != tested.get(k))
+    if not keys or set(keys) - set(LICENCE_KEYS) or any(tested.get(k) != 0 for k in keys):
+        raise Failed(f"module.json in the test copy differs in {keys}, not only in licence ids set to 0")
+    return {"files": differing, "module_json_keys": keys}
 
 
 def write_zip(entries, when, out_path):

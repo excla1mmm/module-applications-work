@@ -35,7 +35,7 @@ What each required check means:
 so the required checks never appear on it and the ruleset blocks it. The control modules have already run in the
 image update's own run (linked from the pull request). Ways out, MIKO's choice:
 
-- **B. A GitHub App for the image update** (recommended): the workflow opens the pull request with the App's token
+- **B. A GitHub App for the image update** (recommended; the owner's choice for the real repository, 2026-10-27): the workflow opens the pull request with the App's token
   (stored as a secret in its own environment, `image-update`), so the normal checks run on it and no bypass is
   needed. One more credential to own.
 - **Manual**: an admin sets the ruleset to *Disabled*, merges the image update pull request and sets it back to
@@ -47,6 +47,14 @@ image update's own run (linked from the pull request). Ways out, MIKO's choice:
 
 Also: Settings → Actions → General → "Allow GitHub Actions to create and approve pull requests" on (needed for the
 workflow to open its pull request at all).
+
+## The publisher agreement on maintenance pull requests
+
+`cla.yaml` asks for no signature on a pull request by the repository's owners or members that changes nothing under
+`applications/` (as `terms.yaml` and `take_application.sh` already do): the agreement is for publishers of
+applications. Such pull requests are often made by an AI assistant whose commits GitHub links to the account
+`claude`, which cannot sign. Any pull request that touches `applications/`, or comes from anyone else, still needs every
+author's signature. The exemption only reads the list of changed files through the API.
 
 ## In the sandbox (2026-10-27)
 
@@ -77,7 +85,7 @@ Checked again after that, with no bypass (ruleset read through the API: `enforce
 - force push: the `non_fast_forward` rule is active (read from the API); not attempted, because if the rule failed it
   would rewrite the history of `main`.
 
-Not checked here: that a person's approval is dismissed by a new push. GitHub implements it
+Not checked here (to be checked in the real repository, with MIKO's reviewers): that a person's approval is dismissed by a new push. GitHub implements it
 (`dismiss_stale_reviews_on_push: true`), but in a one-person sandbox nobody can approve: GitHub does not let the author
 approve their own pull request. To check it: a second account with write access approves a pull request, the author
 pushes a commit, the approval shows as dismissed and the merge is blocked again.

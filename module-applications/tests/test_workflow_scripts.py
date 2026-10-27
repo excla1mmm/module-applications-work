@@ -197,6 +197,31 @@ ANSWERS = {
 }
 
 
+@pytest.mark.parametrize("association, files, fails, maintenance", [
+    ("OWNER", ["tools/check", "README.md"], False, "true"),
+    ("MEMBER", ["docs/x.md"], False, "true"),
+    ("OWNER", ["tools/check", "applications/ModuleX/application.yaml"], False, "false"),
+    ("CONTRIBUTOR", ["tools/check"], False, "false"),
+    ("NONE", ["docs/x.md"], False, "false"),
+    ("OWNER", ["docs/x.md"], True, "false"),
+    ("OWNER", [f"docs/{i}.md" for i in range(3000)], False, "false"),
+])
+def test_agreement_is_not_asked_of_maintenance(tmp_path, association, files, fails, maintenance):
+    """cla.yaml: only a pull request by owners or members that changes nothing under applications/ skips the agreement."""
+    workflow = yaml.safe_load((BASE / ".github" / "workflows" / "cla.yaml").read_text())
+    scope, agreement = workflow["jobs"]["agreement"]["steps"][:2]
+    assert scope["id"] == "scope" and agreement["if"].startswith("steps.scope.outputs.maintenance != 'true' && ")
+    (tmp_path / "bin").mkdir()
+    (tmp_path / "files").write_text("\n".join(files) + "\n")
+    (tmp_path / "bin" / "gh").write_text(f"#!/bin/sh\n{'exit 1' if fails else 'cat ' + str(tmp_path / 'files')}\n")
+    (tmp_path / "bin" / "gh").chmod(0o755)
+    output = tmp_path / "output"
+    env = {**os.environ, "PATH": f"{tmp_path / 'bin'}:{os.environ['PATH']}", "GITHUB_OUTPUT": str(output),
+           "REPO": "o/r", "NUMBER": "1", "ASSOCIATION": association, "GH_TOKEN": "x"}
+    subprocess.run(["bash", "-e", "-c", scope["run"]], env=env, check=True, capture_output=True)
+    assert output.read_text().strip() == f"maintenance={maintenance}"
+
+
 def test_triage_comment_lists_the_facts():
     comment = triage.build(FakeGitHub(ANSWERS), "owner/apps", 1, validation())
     assert comment.startswith(triage.MARKER)

@@ -141,7 +141,9 @@ def main():
                 info = check_install.package(application["repo"], application["commit"], work / "git", work / f"{module_id}.zip",
                                              config["timeouts"]["clone"], test_copy=work / f"{module_id}.test.zip")
                 result["package"] = info
-                paid = f"; paid module (lic_product_id {info['lic_product_id']}, lic_feature_id {info['lic_feature_id']}): test copy without licence ids, sha256 {info['test_copy_sha256']}" if "test_copy_sha256" in info else ""
+                paid = (f"; paid module (lic_product_id {info['lic_product_id']}, lic_feature_id {info['lic_feature_id']}): "
+                        f"test copy sha256 {info['test_copy_sha256']}, differs from the package only in module.json "
+                        f"{', '.join(info['test_copy_diff']['module_json_keys'])} = 0 (unpacked and compared)") if "test_copy_sha256" in info else ""
                 return f"{info['files']} files, {info['bytes']} bytes, sha256 {info['sha256']}{paid}", {}
 
             steps.run("package", build)
@@ -157,9 +159,12 @@ def main():
                 steps.run("package_previous", build_previous)
                 previous_zip = work / ("previous.test.zip" if "test_copy_sha256" in result["previous_package"] else "previous.zip")
             if paid:
+                package_info = result["package"]
                 result["license_required"] = ("licence activation and capture, and whatever the module does only with a licence: "
-                                              "not checked (no licence key in the tests); install, enable, disable, uninstall ran on a test copy "
-                                              "with lic_product_id and lic_feature_id set to 0")
+                                              "not checked (no licence key in the tests). The publisher's package "
+                                              f"(sha256 {package_info['sha256']}) was refused for the licence; install, enable, disable, "
+                                              f"uninstall ran on a test copy (sha256 {package_info['test_copy_sha256']}) that differs only in "
+                                              f"module.json {', '.join(package_info['test_copy_diff']['module_json_keys'])} = 0")
         except Failed:
             return finish("fails", 1)
         except Broken:
