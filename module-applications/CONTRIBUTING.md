@@ -74,4 +74,5 @@ registration checks that they come from this repository's workflow, for this pul
 
 `repo` in an application is **required**: it is where the checks build the module from. The catalogue's existing
 `source_url` (optional, shown to users) is a different field and is not changed by this process. Modules admitted
-before this process are not affected unless MIKO decides otherwise.
+before this process are not affected (MIKO's decision of 2026-10-27). Private source is not accepted: `repo` must be a
+public GitHub repository.

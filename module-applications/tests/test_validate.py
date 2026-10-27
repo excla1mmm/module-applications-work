@@ -219,3 +219,19 @@ def test_module_template_with_the_application_template_passes_online(tmp_path):
         os.environ.update(saved)
     assert result.problems == [] and result.warnings == []
     assert result.online["module_json"]["moduleUniqueID"] == "ModuleExample"
+
+
+def test_guid_conflict_differing_only_in_case(tmp_path):
+    """APP-005 across directories whose names differ only in case. Built here rather than kept as a fixture: such a pair
+    cannot be checked out on a case-insensitive file system (macOS, Windows)."""
+    good = yaml.safe_load((HERE / "fixtures" / "good" / "control" / "applications" / "ModuleAppCheck" / "application.yaml").read_text())
+    applications = tmp_path / "applications"
+    (applications / "ModuleAppCheck").mkdir(parents=True)
+    if (applications / "ModuleAPPCheck").exists():
+        pytest.skip("case-insensitive file system: the two directories are one")
+    (applications / "ModuleAPPCheck").mkdir()
+    (applications / "ModuleAppCheck" / "application.yaml").write_text(yaml.safe_dump(good))
+    (applications / "ModuleAPPCheck" / "application.yaml").write_text(yaml.safe_dump({**good, "module_id": "ModuleAPPCheck"}))
+    found = problems_of(validate.validate(tmp_path))
+    assert ("APP-005", "module_id 'ModuleAppCheck' is already claimed by applications/ModuleAPPCheck/") in found
+    assert ("APP-005", "module_id 'ModuleAPPCheck' is already claimed by applications/ModuleAppCheck/") in found

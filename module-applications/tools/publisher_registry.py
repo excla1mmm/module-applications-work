@@ -3,8 +3,8 @@
 """What the licence server knows about publishers and module ids (rule APP-011).
 
 The checks need two answers only the server has: is support_email the address on the confirmed publisher's card, and
-is module_id free or already this publisher's. The server API is LIC-613; until it exists `default()` returns
-StubRegistry, which answers "not_checked". A "not_checked" verdict never fails validation and never counts as
+is module_id free or already this publisher's. The server API is LIC-613 and will be provided later (owner's decision of
+2026-10-27); until then this is an explicit STUB: `default()` returns StubRegistry, which answers "not_checked". A "not_checked" verdict never fails validation and never counts as
 passed: whoever registers the module after merge (LIC-614) must ask the server itself.
 
 A registry implements one method:

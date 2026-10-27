@@ -1,9 +1,9 @@
 # MikoPBX Publisher Agreement — DRAFT
 
-> **Черновик. Текст утверждает MIKO.** Юридический текст здесь не придуман: ниже — только место для него и то, как
+> **Черновик. Текст утверждает MIKO; вопрос отложен владельцем (27.10.2026) — вернуться позже.** Юридический текст здесь не придуман: ниже — только место для него и то, как
 > устроена подпись. Подпись в пилоте подтверждает лишь, что издатель прочитал этот черновик.
 >
-> **Draft. The text is approved by MIKO.** No legal text is invented here: below is only the place for it and how
+> **Draft. The text is approved by MIKO; the owner has deferred this question (2026-10-27).** No legal text is invented here: below is only the place for it and how
 > signing works. In the pilot a signature only confirms that the publisher has read this draft.
 
 ## Как подписать / How to sign

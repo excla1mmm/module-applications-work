@@ -1,9 +1,9 @@
 # module-applications terms — DRAFT
 
-> **Черновик. Текст утверждает MIKO.** Здесь нет юридического текста: только перечень того, что условия должны
+> **Черновик. Текст утверждает MIKO; вопрос отложен владельцем (27.10.2026) — вернуться позже.** Здесь нет юридического текста: только перечень того, что условия должны
 > покрыть, собранный из процесса. До утверждения чекбокс в PR принимает этот черновик только для пилота.
 >
-> **Draft. The text is approved by MIKO.** There is no legal text here, only the list of what the terms must cover,
+> **Draft. The text is approved by MIKO; the owner has deferred this question (2026-10-27).** There is no legal text here, only the list of what the terms must cover,
 > taken from the process. Until it is approved, the box in a pull request accepts this draft for the pilot only.
 
 ## Что должны покрыть условия / What the terms must cover
