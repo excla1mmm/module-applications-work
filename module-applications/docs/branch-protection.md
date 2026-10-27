@@ -44,3 +44,24 @@ image update's own run (linked from the pull request). Two ways out, MIKO's choi
   but one more credential to own.
 
 Also: Settings → Actions → General → "Allow GitHub Actions to create and approve pull requests" on (needed for A).
+
+## In the sandbox (2026-10-27)
+
+Ruleset `main: applications gate` (id 25947319) on excla1mmm/module-applications follows the table, option A, with
+two differences for a one-person sandbox: "Require approval of the most recent reviewable push" is **off** (turn it
+on in the real repository) and code owner review is off (no CODEOWNERS yet).
+
+Checked without using the bypass:
+
+- a direct push to `main` is refused: `GH013: Repository rule violations ... Changes must be made through a pull
+  request. 5 of 5 required status checks are expected.`, `main` unchanged;
+- a pull request whose tests fail (#8: `result` failure, no `AI review` status) cannot be merged;
+- a push after the AI review (#6: the reviewed head had `AI review` = success; after a new commit the new head has no
+  `AI review` status until the review runs again) cannot be merged;
+- force push: the `non_fast_forward` rule is active (read from the API); not attempted, because if the rule failed it
+  would rewrite the history of `main`.
+
+Not checked here: that a person's approval is dismissed by a new push. GitHub implements it
+(`dismiss_stale_reviews_on_push: true`), but in a one-person sandbox nobody can approve: GitHub does not let the author
+approve their own pull request. To check it: a second account with write access approves a pull request, the author
+pushes a commit, the approval shows as dismissed and the merge is blocked again.
