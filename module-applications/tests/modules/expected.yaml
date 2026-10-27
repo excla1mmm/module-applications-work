@@ -1,0 +1,14 @@
+# What tools/check must report for each test module. tests/test_check.py runs them and compares.
+# workers / api are also passed to tools/check as --expect.
+ModuleAppCheck:
+  outcome: passes
+  workers: 1
+  api: true
+  update_from: eb13e87500abdf6852b3001ed63b2570ea6d0f89   # 1.0.0, updated in place to 1.1.0
+ModuleAppBroken:
+  outcome: fails
+ModuleAppProbe:
+  outcome: passes
+  api: true
+  # Every probe must come back empty: nothing secret-like in any environment, no host file, no route out.
+  probe_empty: true
