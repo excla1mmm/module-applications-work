@@ -13,7 +13,7 @@
 # Evidence: Core = mikopbx/Core develop @ e7e2109 (2026-10-27), paths under src/. Template = mikopbx/ModuleTemplate
 # @ e056e8b. Spec = Core branch docs/third-party-modules-spec, docs/superpowers/specs/2026-09-21-third-party-modules-design.md.
 
-rules_version: "0.1.0"
+rules_version: "0.2.0"
 
 rules:
   # --- The application (applications/<module_id>/application.yaml) ---------------------------------------------
@@ -182,8 +182,35 @@ rules:
   - id: CODE-006
     level: recommended
     check: review
+    status: withdrawn
+    statement: Replaced by SEC-001 (rules 0.2.0), which makes it mandatory.
+
+  # --- Security (read by the AI review and the human reviewer) -------------------------------------------------
+  - id: SEC-001
+    level: mandatory
+    check: review
     status: draft
-    statement: No secrets, tokens or keys in the repository.
+    statement: No secrets, tokens, passwords or private keys in the source.
+  - id: SEC-002
+    level: mandatory
+    check: review
+    status: draft
+    statement: No shell command, SQL statement, file path or URL built from external input (HTTP, AMI, AGI, database) without escaping or validation.
+  - id: SEC-003
+    level: mandatory
+    check: review
+    status: draft
+    statement: No code downloaded and run at run time, no obfuscated code (eval of decoded or packed strings), no behaviour that changes when a test environment is detected.
+  - id: SEC-004
+    level: mandatory
+    check: review
+    status: draft
+    statement: Every outgoing network connection is what the module is for and is described in its README; no hidden telemetry or data sent elsewhere.
+  - id: SEC-005
+    level: mandatory
+    check: review
+    status: draft
+    statement: The module writes only inside its own directory and its own database; it does not change system files, users, SSH keys, the firewall or other modules.
 
   # --- Lifecycle in MikoPBX (tools/check) ----------------------------------------------------------------------
   - id: LIFE-001

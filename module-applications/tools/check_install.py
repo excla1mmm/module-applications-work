@@ -402,7 +402,9 @@ def _lifecycle(pbx, module_id, zip_path, previous_zip, timeouts, steps, expect, 
 
     def services():
         found = []
-        for _ in range(30):  # WorkerSafeScriptsCore starts module workers shortly after enable
+        # WorkerSafeScriptsCore starts module workers shortly after enable: wait up to 90 s for expected workers,
+        # 30 s when none are expected.
+        for _ in range(30 if expect.get("workers") else 10):
             found = pbx.workers(module_id)
             if found and len(found) >= expect.get("workers", 0):
                 break

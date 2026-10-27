@@ -34,7 +34,10 @@ a pull request that touches them together with an application is rejected by the
    - **Terms**, **Publisher agreement**: your box and your signature.
    - **Validate**: the rules; a triage comment summarises what a reviewer will look at.
    - **Test**: the module installed, enabled, disabled and uninstalled in MikoPBX on each architecture you declared.
-     The result (JSON, kept three days) is attached to the run.
+     The result (JSON, kept seven days) is attached to the run.
+   - **AI review**, after Test passes and a MIKO person starts it: a report on the pull request with blockers (each
+     tied to a rule, a file and a line) apart from recommendations, and the status "AI review" on your commit. It
+     finds problems; it approves nothing ([docs/ai-review.md](docs/ai-review.md)).
 7. Fix what they report by pushing a new commit to your module and updating `commit` in the application. Every change
    to the application starts all the checks again.
 8. A MIKO reviewer approves the application. The approval covers this exact commit, this revision of the application

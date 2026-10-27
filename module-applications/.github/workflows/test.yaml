@@ -1,7 +1,7 @@
 name: "Test"
 # Installs, enables, disables and uninstalls the module an application pull request adds or changes, in a fresh
 # MikoPBX container on each architecture the application declares, with tools/check. The JSON result is a
-# short-lived artifact; the log says which step failed.
+# short-lived artifact (seven days: long enough for the AI review to be approved); the log says which step failed.
 #
 # Threat model. The module is code from anyone, and the application can be edited by anyone who opens a pull request.
 #   - pull_request_target, not pull_request: the workflow file, tools/ and config/ always come from the base branch,
@@ -92,6 +92,30 @@ jobs:
           [ "$code" = 0 ] || { echo "::error::applications/$MODULE_ID/ breaks the rules (listed above): nothing is installed."; exit 1; }
           echo "application=$(base64 -w0 "applications/$MODULE_ID/application.yaml")" >> "$GITHUB_OUTPUT"
 
+      - name: Record which pull request, commit and application this run tests
+        if: steps.take.outputs.module_id != ''
+        env:
+          MODULE_ID: ${{ steps.take.outputs.module_id }}
+          PR: ${{ github.event.pull_request.number || inputs.pr }}
+          HEAD_SHA: ${{ steps.take.outputs.head }}
+          PREVIOUS: ${{ steps.take.outputs.previous }}
+          BASE_SHA: ${{ github.sha }}
+        run: |
+          # Written by this job, which runs no code from the module, before the module jobs start. Artifact names are
+          # unique within a run, so a module job cannot replace it. The AI review checks it against the GitHub API.
+          jq -n --arg module_id "$MODULE_ID" --argjson pr "$PR" --arg head "$HEAD_SHA" --arg previous "$PREVIOUS" --arg base "$BASE_SHA" \
+            --arg application_sha256 "$(sha256sum "applications/$MODULE_ID/application.yaml" | cut -d' ' -f1)" \
+            '{module_id: $module_id, pull_request: $pr, head: $head, previous: $previous, base: $base, application_sha256: $application_sha256}' > provenance.json
+          cat provenance.json
+
+      - name: Keep the provenance with the run
+        if: steps.take.outputs.module_id != ''
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2 (sha-pinned)
+        with:
+          name: provenance
+          path: provenance.json
+          retention-days: 7
+
       - name: One run per declared architecture
         id: matrix
         if: steps.take.outputs.module_id != ''
@@ -164,11 +188,11 @@ jobs:
           [ "$code" = 0 ] || echo "::error::$MODULE_ID on $ARCH $result."
           exit "$code"
 
-      - name: Keep the result for three days
+      - name: Keep the result for seven days
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2 (sha-pinned)
         with:
           name: result-${{ needs.application.outputs.module_id }}-${{ matrix.arch }}
           path: result.json
           if-no-files-found: ignore
-          retention-days: 3
+          retention-days: 7

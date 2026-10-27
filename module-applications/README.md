@@ -9,8 +9,8 @@ that exact commit in fresh MikoPBX containers on x86_64 and arm64. MIKO then rev
 After the merge the module is registered to its confirmed publisher, and the application stays here as the record
 that the module was admitted.
 
-**Status: pilot.** The terms and the publisher agreement are drafts until MIKO approves their text; the AI report and
-the registration after merge are not built yet.
+**Status: pilot.** The terms and the publisher agreement are drafts until MIKO approves their text; the registration
+after merge is not built yet.
 
 ```
 your repository ──► pull request ──► checks ──► fixes ──► MIKO approves the commit ──► merge ──► registration ──► versions in the cabinet
@@ -19,7 +19,7 @@ your repository ──► pull request ──► checks ──► fixes ──�
                                        ├─ Publisher agreement: signed by a comment
                                        ├─ Validate: the rules + a triage comment for the reviewer
                                        ├─ Test: install / enable / disable / uninstall in MikoPBX, x86_64 and arm64
-                                       └─ AI report (planned): blockers with the rule they break, apart from advice
+                                       └─ AI review: blockers with the rule and evidence, apart from advice (docs/ai-review.md)
 ```
 
 ## Submitting a module
@@ -46,8 +46,8 @@ One application is one directory is one module id (GUID). Each new module needs 
 | `tools/validate.py` | The rules, offline (format) and online (the module's repository at the commit) |
 | `tools/check` | The module's life in a fresh MikoPBX container; `tools/package` builds just the ZIP |
 | `config/mikopbx.yaml` | MIKO's trusted test configuration: the stable MikoPBX image by digest, limits, timeouts. `image-update.yaml` proposes a new digest by pull request after the control modules pass on it; a new image makes earlier results stale |
-| `.github/workflows/` | `terms`, `cla` (publisher agreement), `validate` (rules + triage comment), `test` (MikoPBX matrix) |
-| `docs/` | How the checks work: [MikoPBX in Docker](docs/mikopbx-docker.md), [security of the checks](docs/security.md) |
+| `.github/workflows/` | `terms`, `cla` (publisher agreement), `validate` (rules + triage comment), `test` (MikoPBX matrix), `ai-review` (stage 3), `image-update` |
+| `docs/` | How the checks work: [MikoPBX in Docker](docs/mikopbx-docker.md), [AI review](docs/ai-review.md), [security of the checks](docs/security.md) |
 | `TERMS.md`, `PUBLISHER_AGREEMENT.md` | Drafts: the text is approved by MIKO |
 
 The checks run the same code locally and in CI. The workflows, tools, rules and configuration always come from the
