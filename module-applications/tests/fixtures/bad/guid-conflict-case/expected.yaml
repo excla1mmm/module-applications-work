@@ -1,0 +1,7 @@
+# two applications for the same GUID, differing only in case
+online: false
+problems:
+- rule: APP-005
+  contains: already claimed by applications/ModuleAPPCheck/
+- rule: APP-005
+  contains: already claimed by applications/ModuleAppCheck/

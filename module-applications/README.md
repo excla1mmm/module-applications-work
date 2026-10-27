@@ -1,0 +1,61 @@
+# MikoPBX module applications
+
+[Русская версия](README.ru.md)
+
+To place a third-party module in the MikoPBX marketplace, its publisher opens a pull request here that adds one
+file: `applications/<module_id>/application.yaml`. The module's source stays in the publisher's own GitHub
+repository; the application names that repository and **one full commit SHA**. Robots check the application and test
+that exact commit in fresh MikoPBX containers on x86_64 and arm64. MIKO then reviews it and approves that commit.
+After the merge the module is registered to its confirmed publisher, and the application stays here as the record
+that the module was admitted.
+
+**Status: pilot.** The terms and the publisher agreement are drafts until MIKO approves their text; the AI report and
+the registration after merge are not built yet.
+
+```
+your repository ──► pull request ──► checks ──► fixes ──► MIKO approves the commit ──► merge ──► registration ──► versions in the cabinet
+                    (one application)  │
+                                       ├─ Terms: the box in the description
+                                       ├─ Publisher agreement: signed by a comment
+                                       ├─ Validate: the rules + a triage comment for the reviewer
+                                       ├─ Test: install / enable / disable / uninstall in MikoPBX, x86_64 and arm64
+                                       └─ AI report (planned): blockers with the rule they break, apart from advice
+```
+
+## Submitting a module
+
+See [CONTRIBUTING.md](CONTRIBUTING.md): a new application, an update and a withdrawal. In short:
+
+1. Your module is in a public GitHub repository and follows [module-template/](module-template/) (the mandatory
+   MikoPBX contract is listed there and in [rules/rules.yaml](rules/rules.yaml)).
+2. Copy [templates/application.yaml](templates/application.yaml) to `applications/<module_id>/application.yaml`,
+   fill it in, and check it locally with `tools/validate.py --online <module_id>` and `tools/check <module_id>`.
+3. Open a pull request that changes that one file, tick the boxes, and sign the publisher agreement.
+
+One application is one directory is one module id (GUID). Each new module needs its own application.
+
+## What is in this repository
+
+| Path | What |
+|---|---|
+| `applications/<module_id>/application.yaml` | Admitted modules (the registry) and, in pull requests, applications |
+| `templates/application.yaml` | The application to copy |
+| `schema/application.schema.json` | The application format, with its version |
+| `rules/rules.yaml` | The requirements, each with an id: the mandatory MikoPBX contract apart from recommendations |
+| `module-template/` | The smallest module that passes, with how to build its ZIP and run the checks |
+| `tools/validate.py` | The rules, offline (format) and online (the module's repository at the commit) |
+| `tools/check` | The module's life in a fresh MikoPBX container; `tools/package` builds just the ZIP |
+| `config/mikopbx.yaml` | MIKO's trusted test configuration: MikoPBX images by digest, limits, timeouts |
+| `.github/workflows/` | `terms`, `cla` (publisher agreement), `validate` (rules + triage comment), `test` (MikoPBX matrix) |
+| `docs/` | How the checks work: [MikoPBX in Docker](docs/mikopbx-docker.md), [security of the checks](docs/security.md) |
+| `TERMS.md`, `PUBLISHER_AGREEMENT.md` | Drafts: the text is approved by MIKO |
+
+The checks run the same code locally and in CI. The workflows, tools, rules and configuration always come from the
+base branch: a pull request cannot change what it is checked against, and one that touches anything outside its
+`applications/<module_id>/` is rejected before anything else runs.
+
+## Licence
+
+The tools are Apache-2.0. Parts are adapted from [anthropics/oss-scanner](https://github.com/anthropics/oss-scanner)
+(Apache-2.0); each such file says so. `module-template/` is derived from
+[mikopbx/ModuleTemplate](https://github.com/mikopbx/ModuleTemplate) (GPL-3.0-or-later).

@@ -27,7 +27,6 @@ import json
 import os
 import pathlib
 import re
-import stat
 import subprocess
 import sys
 import tempfile
